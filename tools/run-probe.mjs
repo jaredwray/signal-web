@@ -91,9 +91,12 @@ function verdict(report, netlog, navigation, devtools) {
       navigation: nav,
       netlog_leaf_issuer: chain?.leaf_issuer ?? null,
       devtools_errors: [...new Set(dt)],
+      // Explicit TLS/certificate failure reported by the browser itself.
       certificate_rejected_by_browser:
         (nav && !nav.ok && CERT_ERROR.test(nav.error)) || dt.some((e) => /ERR_CERT_/.test(e)) ||
         Boolean(wsr?.events.some((e) => e.startsWith('close(code=1015'))),
+      // Weaker: a top-level navigation did not reach the host, with no named error.
+      navigation_failed: Boolean(nav && !nav.ok),
     };
   }
   const v = { hosts };
@@ -109,10 +112,12 @@ function verdict(report, netlog, navigation, devtools) {
   } else {
     v.validity = 'VALID';
     const rejected = signalHosts.filter((h) => hosts[h].certificate_rejected_by_browser);
+    const navFailed = signalHosts.filter((h) => hosts[h].navigation_failed);
     const readable = signalHosts.filter((h) => hosts[h].page_cors_fetch_readable);
-    v.reason = `control reachable; browser rejected the certificate of ${rejected.length}/${signalHosts.length} Signal service hosts` +
-      `; page-readable Signal responses: ${readable.length}`;
+    v.reason = `control reachable; explicit certificate rejection for ${rejected.length}/${signalHosts.length} Signal service hosts` +
+      `; top-level navigation failed for ${navFailed.length}/${signalHosts.length}; page-readable Signal responses: ${readable.length}`;
     v.signal_hosts_certificate_rejected = rejected;
+    v.signal_hosts_navigation_failed = navFailed;
     v.signal_hosts_page_readable = readable;
   }
   return v;

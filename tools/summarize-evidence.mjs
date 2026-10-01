@@ -75,7 +75,11 @@ for (const { f, d } of live.filter((x) => x.f.startsWith('probe-') && !x.f.inclu
   const navErr = [...new Set(SIGNAL.map((h) => hosts[h]?.navigation).filter((n) => n && !n.ok).map((n) => n.error.replace(/ at https?:\/\/\S+/, '').replace(/^page\.goto: /, '')))];
   const dt = [...new Set(SIGNAL.flatMap((h) => hosts[h]?.devtools_errors ?? []))].filter((e) => /CERT/.test(e)).map((e) => e.replace('Error in connection establishment: ', 'WS: '));
   const rejected = SIGNAL.filter((h) => hosts[h]?.certificate_rejected_by_browser).length;
-  out.push(row([LABEL[spec] ?? spec, d.browser, ctl, `${cors}/${corsTotal}`, `${nc}/${SIGNAL.length}`, ws,
-    `${rejected}/${SIGNAL.length} rejected: ${[...navErr, ...dt].join('; ') || '-'}`, d.verdict.validity]));
+  const navFailed = SIGNAL.filter((h) => hosts[h]?.navigation_failed).length;
+  const ctlNav = hosts['updates.signal.org']?.navigation;
+  out.push(row([LABEL[spec] ?? spec, d.browser, `${ctl}; navigation ${ctlNav ? (ctlNav.ok ? 'reached' : 'failed') : '-'}`,
+    `${cors}/${corsTotal}`, `${nc}/${SIGNAL.length}`, ws,
+    `explicit cert rejection ${rejected}/${SIGNAL.length}, navigation failed ${navFailed}/${SIGNAL.length}: ${[...navErr, ...dt].join('; ') || '-'}`,
+    d.verdict.validity]));
 }
 console.log(out.join('\n'));

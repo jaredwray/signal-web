@@ -143,9 +143,14 @@ async function openWebDriver(spec, s, { userDataDir }) {
         close: async () => {},
       };
     },
-    /** Top-level navigation; W3C WebDriver reports TLS certificate
-     *  rejections as the standard error code "insecure certificate". */
+    /** Top-level navigation from about:blank. W3C WebDriver should report
+     *  TLS certificate rejections as the error "insecure certificate"; some
+     *  drivers (safaridriver) instead return success while the browser shows
+     *  its own warning page, so we also record whether the target host was
+     *  actually reached (the committed URL left about:blank for it). */
     async navigate(url) {
+      const target = new URL(url).host;
+      await wd(s.url, 'POST', `/session/${id}/url`, { url: 'about:blank' }).catch(() => {});
       const res = await fetch(`${s.url}/session/${id}/url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -153,16 +158,30 @@ async function openWebDriver(spec, s, { userDataDir }) {
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || json.value?.error) {
-        return { ok: false, error: `${json.value?.error ?? res.status}: ${String(json.value?.message ?? '').split('\n')[0]}` };
+        return { ok: false, reached: false, error: `${json.value?.error ?? res.status}: ${String(json.value?.message ?? '').split('\n')[0]}` };
       }
-      // Some drivers (safaridriver) report success after landing on the
-      // browser's own certificate-warning page, so record where we ended up.
-      const title = await wd(s.url, 'GET', `/session/${id}/title`).catch((e) => `(title unavailable: ${e.message.slice(0, 80)})`);
-      const landed = await wd(s.url, 'GET', `/session/${id}/url`).catch(() => null);
+      let landed = null;
+      for (let i = 0; i < 10; i++) {
+        landed = await wd(s.url, 'GET', `/session/${id}/url`).catch(() => null);
+        if (landed && landed !== 'about:blank') break;
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      const title = await wd(s.url, 'GET', `/session/${id}/title`).catch(() => null);
+      let reached = false;
+      try {
+        reached = new URL(landed).host === target;
+      } catch {}
       const interstitial = /not private|certificate|isn.t secure|not secure/i.test(String(title));
-      return interstitial
-        ? { ok: false, error: `browser certificate warning page: "${title}"`, landed_url: landed }
-        : { ok: true, status: null, title, landed_url: landed };
+      if (reached && !interstitial) return { ok: true, reached, title, landed_url: landed };
+      return {
+        ok: false,
+        reached,
+        title,
+        landed_url: landed,
+        error: interstitial
+          ? `browser certificate warning page: "${title}"`
+          : `navigation did not reach ${target} (committed URL: ${landed})`,
+      };
     },
     async close() {
       await wd(s.url, 'DELETE', `/session/${id}`).catch(() => {});

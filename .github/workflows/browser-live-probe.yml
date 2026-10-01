@@ -10,6 +10,8 @@ on:
     paths:
       - web/probe.html
       - web/probe.js
+      - web/index.html
+      - web/app.js
       - tools/run-probe.mjs
       - tools/browsers.mjs
       - .github/workflows/browser-live-probe.yml
@@ -25,7 +27,7 @@ jobs:
   linux:
     name: Linux (Chromium, Chrome, Edge, Firefox, WebKit)
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Check out (plain git, no third-party action)
         env:
@@ -35,6 +37,13 @@ jobs:
           git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
           git fetch -q --depth 1 origin "$HEAD_SHA"
           git checkout -q FETCH_HEAD
+      - name: Install build tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q protobuf-compiler
+          cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - name: Build WASM (the app page's linking attempt needs it)
+        run: bash scripts/build-wasm.sh
       - name: Install npm dependencies and Playwright engines
         run: |
           npm ci
@@ -58,7 +67,7 @@ jobs:
   safari:
     name: macOS (Safari via safaridriver)
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Check out (plain git, no third-party action)
         env:
@@ -68,6 +77,12 @@ jobs:
           git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
           git fetch -q --depth 1 origin "$HEAD_SHA"
           git checkout -q FETCH_HEAD
+      - name: Install build tools
+        run: |
+          brew install protobuf
+          cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - name: Build WASM (the app page's linking attempt needs it)
+        run: bash scripts/build-wasm.sh
       - name: Install npm dependencies
         run: npm ci
       - name: Start safaridriver
