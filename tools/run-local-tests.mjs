@@ -71,6 +71,10 @@ async function runSameSession(spec, urls) {
     const results = [];
     let userAgent = null;
     for (const url of urls) {
+      // The phases differ only in the URL fragment, and a fragment-only change
+      // is a same-document navigation; load about:blank first so every phase
+      // runs in a fresh document.
+      await browser.open('about:blank');
       const page = await browser.open(url);
       await page.waitFor('window.__storagetest !== undefined', 300_000);
       results.push({ result: await page.evaluate('window.__storagetest'), console: page.console });
@@ -131,7 +135,17 @@ async function storage(spec, origin, meta) {
     writeFileSync(join(outDir, `storage-test-${specSlug(spec)}.json`), JSON.stringify(evidence, null, 2) + '\n');
     print(`[${spec}] storage phase 1 (setup)`, p1.result);
     print(`[${spec}] storage phase 2 (after browser restart)`, p2.result);
-    return p1.result.failed + p2.result.failed + (p1.result.crashed ? 1 : 0) + (p2.result.crashed ? 1 : 0);
+    // Each phase must report the phase that was requested; anything else means
+    // a phase did not actually run (e.g. a stale report was read back).
+    let mismatch = 0;
+    for (const [want, got] of [['setup', p1.result], ['resume', p2.result]]) {
+      if (got.skipped) continue;
+      if (got.phase !== want) {
+        mismatch += 1;
+        console.log(`[${spec}] storage ${want}: ERROR report came from phase "${got.phase}"`);
+      }
+    }
+    return mismatch + p1.result.failed + p2.result.failed + (p1.result.crashed ? 1 : 0) + (p2.result.crashed ? 1 : 0);
   } finally {
     if (profile) rmSync(profile, { recursive: true, force: true });
   }

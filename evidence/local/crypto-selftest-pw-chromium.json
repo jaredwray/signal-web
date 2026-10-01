@@ -1,5 +1,6 @@
 {
-  "generated_at": "2026-10-01T14:18:48.040Z",
+  "generated_at": "2026-10-01T14:35:50.072Z",
+  "ci_run": null,
   "origin": "http://localhost:8181",
   "request_interception": "none (pages are only observed)",
   "wasm_bytes": 1334830,
@@ -22,85 +23,85 @@
       "name": "keygen.kyber1024_encapsulate",
       "ok": true,
       "detail": "public key 1569 bytes, ciphertext 1569 bytes, shared secret 32 bytes",
-      "ms": 14.100000000093132
+      "ms": 12.799999999813735
     },
     {
       "name": "pqxdh.publish_bundle_with_kyber",
       "ok": true,
       "detail": "signed prekey + one-time prekey + Kyber1024 prekey",
-      "ms": 2.8999999999068677
+      "ms": 3.2999999998137355
     },
     {
       "name": "pqxdh.process_prekey_bundle",
       "ok": true,
       "detail": "Alice built an outgoing session from Bob's bundle",
-      "ms": 5.600000000093132
+      "ms": 6.1000000005587935
     },
     {
       "name": "session.first_message_is_prekey_message",
       "ok": true,
       "detail": "PreKeySignalMessage decrypted by Bob",
-      "ms": 12.399999999906868
+      "ms": 12.799999999813735
     },
     {
       "name": "session.reply_is_signal_message",
       "ok": true,
       "detail": "SignalMessage decrypted by Alice",
-      "ms": 1.6000000000931323
+      "ms": 1.5
     },
     {
       "name": "session.pqxdh_and_spqr_in_use",
       "ok": true,
       "detail": "both sessions: version 4, EstablishedWithPqxdh + Spqr",
-      "ms": 0.20000000018626451
+      "ms": 0
     },
     {
       "name": "session.evolution_40_messages",
       "ok": true,
       "detail": "40 alternating messages; session record 4296 -> 5680 bytes",
-      "ms": 29.399999999906868
+      "ms": 30
     },
     {
       "name": "session.out_of_order_delivery",
       "ok": true,
       "detail": "6 messages decrypted in order [3,0,5,1,4,2]",
-      "ms": 2.6000000000931323
+      "ms": 2.5
     },
     {
       "name": "persistence.serialize_and_restore_sessions",
       "ok": true,
       "detail": "rebuilt both stores from 12482 serialized bytes; 10 more messages OK",
-      "ms": 7.099999999627471
+      "ms": 7.2999999998137355
     },
     {
       "name": "reject.flipped_mac_bit",
       "ok": true,
       "detail": "rejected at decrypt (decrypt: invalid Whisper message: decryption failed)",
-      "ms": 1
+      "ms": 0.7999999998137355
     },
     {
       "name": "reject.flipped_body_bit",
       "ok": true,
       "detail": "rejected at decrypt (decrypt: invalid Whisper message: decryption failed)",
-      "ms": 0.8999999999068677
+      "ms": 0.39999999944120646
     },
     {
       "name": "reject.truncated",
       "ok": true,
       "detail": "rejected at parse (parse SignalMessage: protobuf encoding was invalid)",
-      "ms": 0
+      "ms": 0.10000000055879354
     },
     {
       "name": "reject.unknown_version",
       "ok": true,
       "detail": "rejected at parse (parse SignalMessage: ciphertext version was too old <2>)",
-      "ms": 0.10000000009313226
+      "ms": 0.09999999962747097
     },
     {
       "name": "accept.original_after_rejections",
       "ok": true,
       "detail": "session state intact after rejected messages",
-      "ms": 0.8999999999068677
+      "ms": 0.5
     },
     {
       "name": "reject.replayed_message",
@@ -112,37 +113,37 @@
       "name": "reject.tampered_prekey_message",
       "ok": true,
       "detail": "rejected at decrypt (decrypt: invalid PreKey message: decryption failed); untampered original then accepted",
-      "ms": 11.900000000372529
+      "ms": 11.799999999813735
     },
     {
       "name": "sealed_sender.roundtrip",
       "ok": true,
       "detail": "466 byte envelope; sender certificate verified",
-      "ms": 4
+      "ms": 4.099999999627471
     },
     {
       "name": "sealed_sender.reject_untrusted_root",
       "ok": true,
       "detail": "rejected (sealed_sender_decrypt: invalid sealed sender message: trust root validation failed); same envelope accepted with the correct root",
-      "ms": 2.5
+      "ms": 2.400000000372529
     },
     {
       "name": "sealed_sender.reject_expired_certificate",
       "ok": true,
       "detail": "rejected (sealed_sender_decrypt: invalid sealed sender message: trust root validation failed)",
-      "ms": 1.3999999999068677
+      "ms": 1.2999999998137355
     },
     {
       "name": "sealed_sender.reject_tampered_envelope",
       "ok": true,
       "detail": "rejected (sealed_sender_decrypt: invalid sealed sender message: failed to decrypt sealed sender v1 message contents)",
-      "ms": 1
+      "ms": 0.900000000372529
     },
     {
       "name": "identity.reject_changed_identity_key",
       "ok": true,
       "detail": "UntrustedIdentity raised for a changed identity key",
-      "ms": 1.6000000000931323
+      "ms": 1.699999999254942
     },
     {
       "name": "provisioning.qr_withheld_until_server_address",
@@ -153,32 +154,32 @@
     {
       "name": "provisioning.address_frame_link_url_and_ack",
       "ok": true,
-      "detail": "URL format matches Signal-Desktop linkDeviceRoute; QR SVG 19314 bytes; ack id 7 status 200",
-      "ms": 7.800000000279397
+      "detail": "URL format matches Signal-Desktop linkDeviceRoute; QR SVG 19240 bytes; ack id 7 status 200",
+      "ms": 12
     },
     {
       "name": "provisioning.roundtrip_envelope_frame",
       "ok": true,
       "detail": "envelope frame decrypted, acknowledged, secrets kept in WASM",
-      "ms": 1.3999999999068677
+      "ms": 2.2000000001862645
     },
     {
       "name": "provisioning.independent_python_vector",
       "ok": true,
       "detail": "359-byte envelope from a separate Python implementation decrypted; all fields match",
-      "ms": 0.7000000001862645
+      "ms": 0.2999999998137355
     },
     {
       "name": "provisioning.reject_flipped_mac",
       "ok": true,
       "detail": "rejected (provision envelope MAC verification failed)",
-      "ms": 0.20000000018626451
+      "ms": 0.10000000055879354
     },
     {
       "name": "provisioning.reject_flipped_ciphertext",
       "ok": true,
       "detail": "rejected (provision envelope MAC verification failed)",
-      "ms": 0.19999999972060323
+      "ms": 0.20000000018626451
     },
     {
       "name": "provisioning.reject_unknown_version",
@@ -196,15 +197,15 @@
       "name": "provisioning.reject_substituted_sender_key",
       "ok": true,
       "detail": "rejected (provision envelope MAC verification failed)",
-      "ms": 0.3000000002793968
+      "ms": 0.19999999925494194
     },
     {
       "name": "provisioning.reject_wrong_recipient",
       "ok": true,
       "detail": "rejected (provision envelope MAC verification failed)",
-      "ms": 0.19999999972060323
+      "ms": 0.10000000055879354
     }
   ],
-  "wasm_instantiate_ms": 22.5,
+  "wasm_instantiate_ms": 19.799999999813735,
   "console": []
 }
