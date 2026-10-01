@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T13:58:22.234Z",
+  "generated_at": "2026-10-01T14:10:51.390Z",
   "origin": "http://localhost:8181",
   "request_interception": "none (pages are only observed)",
   "wasm_bytes": 1334830,
@@ -48,9 +48,9 @@
       }
     ],
     "storage_persist_granted": false,
-    "expected_session_digest": "b707d3d9fdfa658f",
+    "expected_session_digest": "cf63804da7df327c",
     "phase": "setup",
-    "ms": 353
+    "ms": 343
   },
   "phase_resume_after_restart": {
     "kind": "local-storage-test",
@@ -75,7 +75,7 @@
       {
         "name": "conversation.restored_state_matches_commit",
         "ok": true,
-        "detail": "restored session digest b707d3d9fdfa658f"
+        "detail": "restored session digest cf63804da7df327c"
       },
       {
         "name": "conversation.resume_messaging_after_restart",
@@ -104,7 +104,7 @@
       }
     ],
     "phase": "resume",
-    "ms": 293
+    "ms": 290
   },
   "console": []
 }

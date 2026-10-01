@@ -152,8 +152,17 @@ async function openWebDriver(spec, s, { userDataDir }) {
         body: JSON.stringify({ url }),
       });
       const json = await res.json().catch(() => ({}));
-      if (res.ok && !json.value?.error) return { ok: true, status: null };
-      return { ok: false, error: `${json.value?.error ?? res.status}: ${String(json.value?.message ?? '').split('\n')[0]}` };
+      if (!res.ok || json.value?.error) {
+        return { ok: false, error: `${json.value?.error ?? res.status}: ${String(json.value?.message ?? '').split('\n')[0]}` };
+      }
+      // Some drivers (safaridriver) report success after landing on the
+      // browser's own certificate-warning page, so record where we ended up.
+      const title = await wd(s.url, 'GET', `/session/${id}/title`).catch((e) => `(title unavailable: ${e.message.slice(0, 80)})`);
+      const landed = await wd(s.url, 'GET', `/session/${id}/url`).catch(() => null);
+      const interstitial = /not private|certificate|isn.t secure|not secure/i.test(String(title));
+      return interstitial
+        ? { ok: false, error: `browser certificate warning page: "${title}"`, landed_url: landed }
+        : { ok: true, status: null, title, landed_url: landed };
     },
     async close() {
       await wd(s.url, 'DELETE', `/session/${id}`).catch(() => {});

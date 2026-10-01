@@ -69,7 +69,12 @@ async function main() {
   for (const spec of browserArgs(process.argv, ['pw:chromium'])) {
     const results = [];
     for (const t of tests) {
-      const r = await runOne(spec, t, port++);
+      let r;
+      try {
+        r = await runOne(spec, t, port++);
+      } catch (err) {
+        r = { binary: t.name, summary: `ERROR ${String(err.message ?? err).split('\n')[0]}`, tests: [], seconds: 0 };
+      }
       console.log(`[${spec}] ${r.binary}: ${r.summary} (${r.seconds.toFixed(1)} s)`);
       for (const x of r.tests.filter((x) => x.status !== 'ok')) console.log(`  ${x.status} ${x.name}`);
       results.push(r);

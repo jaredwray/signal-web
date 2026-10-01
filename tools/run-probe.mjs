@@ -198,7 +198,14 @@ async function main() {
   const tag = process.env.PROBE_TAG ? `-${process.env.PROBE_TAG}` : '';
   try {
     for (const spec of browserArgs(process.argv, ['pw:chromium'])) {
-      const ev = await probeOne(spec, origin, serverLog);
+      let ev;
+      try {
+        ev = await probeOne(spec, origin, serverLog);
+      } catch (err) {
+        process.exitCode = 1;
+        console.log(`\n=== ${spec}: ERROR ${String(err.message ?? err).split('\n')[0]}`);
+        continue;
+      }
       const file = join(outDir, `probe-${specSlug(spec)}${tag}.json`);
       writeFileSync(file, JSON.stringify(ev, null, 2) + '\n');
       console.log(`\n=== ${spec} (${ev.browser}) -> ${file}`);

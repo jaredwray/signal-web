@@ -62,7 +62,12 @@ function frameLockProbe(timeoutMs = 15000) {
 }
 
 async function setup(pass) {
-  report.storage_persist_granted = await navigator.storage?.persist?.().catch(() => null) ?? null;
+  // Firefox asks the user before granting persistent storage, so persist()
+  // may never settle under automation; record the outcome without blocking.
+  report.storage_persist_granted = await Promise.race([
+    navigator.storage?.persist?.().catch(() => null) ?? Promise.resolve(null),
+    new Promise((resolve) => setTimeout(() => resolve('no answer within 3 s (permission prompt?)'), 3000)),
+  ]);
   await Vault.destroy();
   let vault;
   await check('tablock.this_tab_acquires_lock', async () => {

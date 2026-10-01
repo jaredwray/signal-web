@@ -60,6 +60,23 @@ async function runOnce(spec, url, globalName, opts = {}) {
   }
 }
 
+async function runSameSession(spec, urls) {
+  const browser = await openBrowser(spec);
+  try {
+    const results = [];
+    let userAgent = null;
+    for (const url of urls) {
+      const page = await browser.open(url);
+      await page.waitFor('window.__storagetest !== undefined', 300_000);
+      results.push({ result: await page.evaluate('window.__storagetest'), console: page.console });
+      userAgent = await page.evaluate('navigator.userAgent');
+    }
+    return { ...results[0], version: browser.version, userAgent, second: results[1] };
+  } finally {
+    await browser.close();
+  }
+}
+
 async function selftest(spec, origin, meta) {
   const r = await runOnce(spec, `${origin}/selftest.html`, '__selftest');
   const evidence = { ...meta, browser: r.version, user_agent: r.userAgent, ...r.result, console: r.console };
@@ -78,18 +95,27 @@ async function storage(spec, origin, meta) {
   const passphrase = `test-only-${Math.random().toString(36).slice(2)}`;
   const q = `pass=${encodeURIComponent(passphrase)}`;
   try {
-    const p1 = await runOnce(spec, `${origin}/storage-test.html?phase=setup&${q}`, '__storagetest', { userDataDir: profile });
+    let p1 = await runOnce(spec, `${origin}/storage-test.html?phase=setup&${q}`, '__storagetest', { userDataDir: profile });
     let p2;
     if (supportsProfile) {
       p2 = await runOnce(spec, `${origin}/storage-test.html?phase=resume&${q}`, '__storagetest', { userDataDir: profile });
     } else {
-      p2 = { result: { passed: 0, failed: 0, checks: [], skipped: 'browser restart with a persistent profile is not available through this driver' } };
+      // safaridriver sessions do not keep website data between sessions, so a
+      // real restart cannot be automated; fall back to a fresh page load in
+      // the same session (weaker: same browser process).
+      p1 = await runSameSession(spec, [
+        `${origin}/storage-test.html?phase=setup&${q}`,
+        `${origin}/storage-test.html?phase=resume&${q}`,
+      ]);
+      p2 = p1.second;
     }
     const evidence = {
       ...meta,
       browser: p1.version,
       user_agent: p1.userAgent,
-      restart: supportsProfile ? 'separate browser processes sharing one profile directory' : 'not tested',
+      restart: supportsProfile
+        ? 'separate browser processes sharing one profile directory'
+        : 'NOT a browser restart: fresh page load within one automation session (driver limitation)',
       phase_setup: p1.result,
       phase_resume_after_restart: p2.result,
       console: [...(p1.console ?? []), ...(p2.console ?? [])],
@@ -119,8 +145,15 @@ async function main() {
   let failed = 0;
   try {
     for (const spec of specs) {
-      failed += await selftest(spec, origin, meta);
-      failed += await storage(spec, origin, meta);
+      // One browser's failure (e.g. a timeout) must not hide the others' results.
+      for (const [name, fn] of [['crypto self-test', selftest], ['storage test', storage]]) {
+        try {
+          failed += await fn(spec, origin, meta);
+        } catch (err) {
+          failed += 1;
+          console.log(`[${spec}] ${name}: ERROR ${String(err.message ?? err).split('\n')[0]}`);
+        }
+      }
     }
   } finally {
     server.kill();
