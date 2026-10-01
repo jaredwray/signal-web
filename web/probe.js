@@ -36,14 +36,18 @@ async function probeFetch(url, mode, timeoutMs = 20000) {
     const res = await fetch(url, {
       mode, credentials: 'omit', cache: 'no-store', redirect: mode === 'no-cors' ? 'follow' : 'manual', signal: abort.signal,
     });
-    out.ok = true;
+    out.ok = true; // the promise resolved; see `readable` for a usable response
     out.type = res.type;
     out.status = res.status;
+    // Usable only if the page can read it: an "opaque" (no-cors) or
+    // "opaqueredirect" response exposes neither status nor body.
+    out.readable = res.type === 'cors' || res.type === 'basic';
     // Only headers exposed by CORS are readable from page JS.
     out.readable_headers = [...res.headers.keys()];
     if (mode === 'cors') out.body_bytes = (await res.arrayBuffer()).byteLength;
   } catch (err) {
     out.ok = false;
+    out.readable = false;
     out.error = abort.signal.aborted ? `timeout after ${timeoutMs} ms` : `${err.name}: ${err.message}`;
   } finally {
     clearTimeout(timer);

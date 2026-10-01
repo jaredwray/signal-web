@@ -12,7 +12,7 @@
     "build:wasm": "bash scripts/build-wasm.sh",
     "serve": "node tools/static-server.mjs --root web --port 8080",
     "pretest": "bash scripts/build-wasm.sh",
-    "test": "node tools/run-local-tests.mjs",
+    "test": "node tools/test-probe-verdict.mjs && node tools/run-local-tests.mjs",
     "probe:live": "node tools/run-probe.mjs"
   },
   "devDependencies": {

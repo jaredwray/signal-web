@@ -17,17 +17,15 @@
 // network that re-terminates TLS, so such a network cannot be mistaken for a
 // Signal result.
 
-import { X509Certificate } from 'node:crypto';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { browserArgs, openBrowser, parseSpec, specSlug } from './browsers.mjs';
+import { NAV_HOSTS, navUrl, summarizeNetLog, verdict } from './probe-verdict.mjs';
 import { readServerLog, startServer } from './run-local-tests.mjs';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SIGNAL_ROOT_SHA256 =
-  'DD:B0:F9:2B:B9:5C:8D:6F:D2:02:EA:6E:8C:C5:CC:D1:82:B5:44:F8:CD:69:6F:47:D5:80:65:9D:DC:9D:F6:5A';
 
 if (process.env.SIGNAL_WEB_LIVE !== '1') {
   console.error('This probe contacts Signal servers. Re-run with SIGNAL_WEB_LIVE=1 to opt in.');
@@ -40,93 +38,7 @@ const ciRun = process.env.GITHUB_RUN_ID
   ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
   : null;
 const outDir = process.env.EVIDENCE_OUT ?? join(repo, 'evidence', 'live');
-// Top-level navigation targets: the browser's own TLS verdict per host.
-const NAV_HOSTS = [
-  'chat.signal.org', 'grpc.chat.signal.org', 'storage.signal.org', 'cdn.signal.org',
-  'cdn2.signal.org', 'cdn3.signal.org', 'cdsi.signal.org', 'svr2.signal.org',
-  'updates.signal.org', // control: publicly trusted certificate
-];
-const CERT_ERROR = /CERT|certificate|SEC_ERROR|SSL_ERROR|insecure/i;
 const scratch = process.env.PROBE_SCRATCH_DIR ?? join(tmpdir(), 'signal-web-probe');
-
-function summarizeNetLog(path) {
-  let log;
-  try {
-    log = JSON.parse(readFileSync(path, 'utf8'));
-  } catch (err) {
-    return { error: `could not parse NetLog: ${err.message}` };
-  }
-  const typeName = Object.fromEntries(Object.entries(log.constants.logEventTypes).map(([k, v]) => [v, k]));
-  const chains = new Map();
-  const proxies = new Set();
-  for (const ev of log.events) {
-    const type = typeName[ev.type];
-    if (type === 'PROXY_RESOLUTION_SERVICE_RESOLVED_PROXY_LIST') proxies.add(ev.params?.proxy_info);
-    if (type === 'SSL_CERTIFICATES_RECEIVED' && ev.params?.certificates) {
-      const certs = ev.params.certificates.map((pem) => new X509Certificate(pem));
-      const leaf = certs[0];
-      const host = (leaf.subjectAltName ?? '').replace(/^DNS:/, '').split(',')[0];
-      chains.set(host, {
-        host,
-        leaf_issuer: leaf.issuer.replace(/\n/g, ', '),
-        leaf_valid: `${leaf.validFrom} -> ${leaf.validTo}`,
-        chain_length: certs.length,
-        chain_sha256: certs.map((c) => c.fingerprint256),
-        includes_signal_root: certs.some((c) => c.fingerprint256 === SIGNAL_ROOT_SHA256),
-      });
-    }
-  }
-  return { proxy_resolution: [...proxies], certificate_chains_received: [...chains.values()] };
-}
-
-function verdict(report, netlog, navigation, devtools) {
-  const chains = netlog?.certificate_chains_received ?? [];
-  const pageCors = (host) => report.results.find((r) => r.kind === 'fetch/cors' && new URL(r.url).host === host);
-  const ws = (host) => report.results.find((r) => r.kind === 'websocket' && new URL(r.url).host === host);
-  const hosts = {};
-  for (const host of NAV_HOSTS) {
-    const nav = navigation[host];
-    const chain = chains.find((c) => c.host === host);
-    const dt = devtools.filter((d) => d.url && new URL(d.url).host === host)
-      .map((d) => d.error_text || d.ws_error).filter(Boolean);
-    const wsr = ws(host);
-    hosts[host] = {
-      page_cors_fetch_readable: pageCors(host) ? Boolean(pageCors(host).ok) : null,
-      page_websocket: wsr ? wsr.events.join(' -> ') : null,
-      navigation: nav,
-      netlog_leaf_issuer: chain?.leaf_issuer ?? null,
-      devtools_errors: [...new Set(dt)],
-      // Explicit TLS/certificate failure reported by the browser itself.
-      certificate_rejected_by_browser:
-        (nav && !nav.ok && CERT_ERROR.test(nav.error)) || dt.some((e) => /ERR_CERT_/.test(e)) ||
-        Boolean(wsr?.events.some((e) => e.startsWith('close(code=1015'))),
-      // Weaker: a top-level navigation did not reach the host, with no named error.
-      navigation_failed: Boolean(nav && !nav.ok),
-    };
-  }
-  const v = { hosts };
-  const control = hosts['updates.signal.org'];
-  const intercepted = chains.some((c) => !/Signal Messenger|Google Trust Services|Amazon|DigiCert|Let's Encrypt|GlobalSign/.test(c.leaf_issuer));
-  const signalHosts = NAV_HOSTS.filter((h) => h !== 'updates.signal.org');
-  if (intercepted || control.certificate_rejected_by_browser) {
-    v.validity = 'INVALID_FOR_SIGNAL_CONCLUSIONS';
-    v.reason = 'the network re-terminated TLS (foreign certificate issuer seen, or the publicly trusted control was rejected)';
-  } else if (!control.page_cors_fetch_readable && !(control.navigation?.ok)) {
-    v.validity = 'INCONCLUSIVE';
-    v.reason = 'the publicly trusted control host was unreachable from this browser';
-  } else {
-    v.validity = 'VALID';
-    const rejected = signalHosts.filter((h) => hosts[h].certificate_rejected_by_browser);
-    const navFailed = signalHosts.filter((h) => hosts[h].navigation_failed);
-    const readable = signalHosts.filter((h) => hosts[h].page_cors_fetch_readable);
-    v.reason = `control reachable; explicit certificate rejection for ${rejected.length}/${signalHosts.length} Signal service hosts` +
-      `; top-level navigation failed for ${navFailed.length}/${signalHosts.length}; page-readable Signal responses: ${readable.length}`;
-    v.signal_hosts_certificate_rejected = rejected;
-    v.signal_hosts_navigation_failed = navFailed;
-    v.signal_hosts_page_readable = readable;
-  }
-  return v;
-}
 
 async function probeOne(spec, origin, serverLog) {
   const s = parseSpec(spec);
@@ -195,7 +107,7 @@ async function probeOne(spec, origin, serverLog) {
     // Then the browser's own TLS verdict per host via top-level navigation
     // (last, because certificate-warning pages can disturb later automation).
     for (const host of NAV_HOSTS) {
-      navigation[host] = await browser.navigate(`https://${host}/`);
+      navigation[host] = await browser.navigate(navUrl(host));
     }
   } finally {
     await browser.close();
@@ -211,7 +123,7 @@ async function probeOne(spec, origin, serverLog) {
     origin: `${origin} (static files only)`,
     request_interception: 'none',
     network_path: proxyServer ? 'explicit HTTPS CONNECT proxy from environment' : 'browser default',
-    verdict: verdict(report, netlog, navigation, [...net.values()]),
+    verdict: verdict(report, netlog, navigation, [...net.values()], { chromiumFamily }),
     navigation,
     app_link_attempt: appLink,
     page_report: report,
@@ -253,10 +165,10 @@ async function main() {
         console.log(`  netlog: ${c.host} leaf issuer="${c.leaf_issuer}" signal_root=${c.includes_signal_root}`);
       }
       for (const [host, nav] of Object.entries(ev.navigation)) {
-        console.log(`  navigate https://${host}/ -> ${nav.ok ? `ok ${nav.status ?? ''}` : nav.error}`);
+        console.log(`  navigate ${navUrl(host)} -> ${nav.ok ? `ok ${nav.status ?? ''}` : nav.error}`);
       }
       console.log(`  app link attempt: QR shown=${ev.app_link_attempt?.qr_shown} status="${ev.app_link_attempt?.status_text?.slice(0, 90)}..."`);
-      console.log(`  VERDICT: ${ev.verdict.validity} - ${ev.verdict.reason}`);
+      console.log(`  VERDICT: ${ev.verdict.validity} - ${ev.verdict.reason} [interception check: ${ev.verdict.interception_check}]`);
       // Machine-readable copy for CI logs (no secrets: no credentials are used).
       console.log(`PROBE_EVIDENCE_JSON ${JSON.stringify(ev)}`);
     }

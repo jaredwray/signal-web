@@ -115,6 +115,10 @@ async function openWebDriver(spec, s, { userDataDir }) {
   }
   const session = await wd(s.url, 'POST', '/session', { capabilities: { alwaysMatch } });
   const id = session.sessionId;
+  // The default page-load timeout (300 s) equals Node fetch's response-header
+  // timeout, so a navigation that never commits (e.g. a download) could make
+  // the client give up first; a shorter driver timeout always answers first.
+  await wd(s.url, 'POST', `/session/${id}/timeouts`, { pageLoad: 60_000 }).catch(() => {});
   const caps = session.capabilities ?? {};
   const exec = (expr) => wd(s.url, 'POST', `/session/${id}/execute/sync`, {
     script: `return (${expr});`,
@@ -151,11 +155,16 @@ async function openWebDriver(spec, s, { userDataDir }) {
     async navigate(url) {
       const target = new URL(url).host;
       await wd(s.url, 'POST', `/session/${id}/url`, { url: 'about:blank' }).catch(() => {});
-      const res = await fetch(`${s.url}/session/${id}/url`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
-      });
+      let res;
+      try {
+        res = await fetch(`${s.url}/session/${id}/url`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url }),
+        });
+      } catch (err) {
+        return { ok: false, reached: false, error: `WebDriver request failed: ${err.cause?.code ?? err.message}` };
+      }
       const json = await res.json().catch(() => ({}));
       if (!res.ok || json.value?.error) {
         return { ok: false, reached: false, error: `${json.value?.error ?? res.status}: ${String(json.value?.message ?? '').split('\n')[0]}` };

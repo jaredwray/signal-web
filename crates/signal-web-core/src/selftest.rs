@@ -202,15 +202,16 @@ fn parse(w: &Wire) -> R<CiphertextMessage> {
     }
 }
 
-async fn receive(
+/// Decrypts and keeps libsignal's error variant, so checks can assert *why*
+/// a message was rejected.
+async fn decrypt_raw(
     to: &mut Party,
     from: &ProtocolAddress,
-    w: &Wire,
+    msg: &CiphertextMessage,
     rng: &mut ThreadRng,
-) -> R<Vec<u8>> {
-    let msg = parse(w)?;
+) -> std::result::Result<Vec<u8>, SignalProtocolError> {
     message_decrypt(
-        &msg,
+        msg,
         from,
         &to.address,
         &mut to.store.session_store,
@@ -221,7 +222,18 @@ async fn receive(
         rng,
     )
     .await
-    .map_err(ctx("decrypt"))
+}
+
+async fn receive(
+    to: &mut Party,
+    from: &ProtocolAddress,
+    w: &Wire,
+    rng: &mut ThreadRng,
+) -> R<Vec<u8>> {
+    let msg = parse(w)?;
+    decrypt_raw(to, from, &msg, rng)
+        .await
+        .map_err(ctx("decrypt"))
 }
 
 async fn exchange(
@@ -406,12 +418,24 @@ async fn run_inner(report: &mut Report) -> R<()> {
     let mut bob_bundle: Option<PreKeyBundle> = None;
     step!(report, "pqxdh.publish_bundle_with_kyber", {
         let bundle = publish_bundle(&mut bob, rng).await?;
+        let kyber = bundle.kyber_pre_key_public().map_err(ctx("kyber prekey"))?;
         ensure(
-            bundle.kyber_pre_key_public().is_ok(),
-            "bundle lacks kyber prekey",
+            kyber.key_type() == kem::KeyType::Kyber1024,
+            "kyber prekey is not Kyber1024",
+        )?;
+        let signature = bundle
+            .kyber_pre_key_signature()
+            .map_err(ctx("kyber prekey signature"))?;
+        ensure(
+            bundle
+                .identity_key()
+                .map_err(ctx("identity key"))?
+                .public_key()
+                .verify_signature(&kyber.serialize(), signature),
+            "kyber prekey signature does not verify under the identity key",
         )?;
         bob_bundle = Some(bundle);
-        Ok("signed prekey + one-time prekey + Kyber1024 prekey".into())
+        Ok("signed prekey + one-time prekey + Kyber1024 prekey signed by the identity key".into())
     });
 
     step!(report, "pqxdh.process_prekey_bundle", {
@@ -571,8 +595,11 @@ async fn run_inner(report: &mut Report) -> R<()> {
     });
 
     step!(report, "reject.replayed_message", {
-        match receive(&mut bob, &alice_addr, &original, rng).await {
-            Err(err) => Ok(format!("replay rejected ({err})")),
+        match decrypt_raw(&mut bob, &alice_addr, &parse(&original)?, rng).await {
+            Err(err @ SignalProtocolError::DuplicatedMessage(..)) => {
+                Ok(format!("replay rejected as DuplicatedMessage ({err})"))
+            }
+            Err(err) => Err(format!("replay rejected for an unexpected reason: {err}")),
             Ok(_) => Err("replayed message was accepted".into()),
         }
     });
@@ -655,12 +682,12 @@ async fn run_inner(report: &mut Report) -> R<()> {
         .map_err(ctx("sealed_sender_encrypt"))
     }
 
-    async fn unseal(
+    async fn unseal_raw(
         to: &mut Party,
         ct: &[u8],
         root: &PublicKey,
         at_millis: u64,
-    ) -> R<SealedSenderDecryptionResult> {
+    ) -> std::result::Result<SealedSenderDecryptionResult, SignalProtocolError> {
         sealed_sender_decrypt(
             ct,
             root,
@@ -675,7 +702,17 @@ async fn run_inner(report: &mut Report) -> R<()> {
             &mut to.store.kyber_pre_key_store,
         )
         .await
-        .map_err(ctx("sealed_sender_decrypt"))
+    }
+
+    async fn unseal(
+        to: &mut Party,
+        ct: &[u8],
+        root: &PublicKey,
+        at_millis: u64,
+    ) -> R<SealedSenderDecryptionResult> {
+        unseal_raw(to, ct, root, at_millis)
+            .await
+            .map_err(ctx("sealed_sender_decrypt"))
     }
 
     step!(report, "sealed_sender.roundtrip", {
@@ -696,9 +733,9 @@ async fn run_inner(report: &mut Report) -> R<()> {
     step!(report, "sealed_sender.reject_untrusted_root", {
         let ct = sealed(&mut alice, &bob_addr, &sender_cert, b"wrong root", rng).await?;
         let other_root = KeyPair::generate(rng);
-        match unseal(&mut bob, &ct, &other_root.public_key, clock::now_millis()).await {
+        match unseal_raw(&mut bob, &ct, &other_root.public_key, clock::now_millis()).await {
             Ok(_) => Err("accepted certificate from untrusted root".into()),
-            Err(err) => {
+            Err(err @ SignalProtocolError::InvalidSealedSenderMessage(_)) => {
                 let res =
                     unseal(&mut bob, &ct, &trust_root.public_key, clock::now_millis()).await?;
                 ensure(
@@ -706,15 +743,16 @@ async fn run_inner(report: &mut Report) -> R<()> {
                     "retry with correct root failed",
                 )?;
                 Ok(format!(
-                    "rejected ({err}); same envelope accepted with the correct root"
+                    "rejected as InvalidSealedSenderMessage ({err}); same envelope accepted with the correct root"
                 ))
             }
+            Err(err) => Err(format!("rejected for an unexpected reason: {err}")),
         }
     });
 
     step!(report, "sealed_sender.reject_expired_certificate", {
         let ct = sealed(&mut alice, &bob_addr, &sender_cert, b"expired", rng).await?;
-        match unseal(
+        match unseal_raw(
             &mut bob,
             &ct,
             &trust_root.public_key,
@@ -723,17 +761,42 @@ async fn run_inner(report: &mut Report) -> R<()> {
         .await
         {
             Ok(_) => Err("accepted expired sender certificate".into()),
-            Err(err) => Ok(format!("rejected ({err})")),
+            Err(err @ SignalProtocolError::InvalidSealedSenderMessage(_)) => {
+                // Same envelope, same root, 2 ms earlier: must be accepted, so
+                // the rejection above was caused by the expiry alone.
+                let res = unseal(
+                    &mut bob,
+                    &ct,
+                    &trust_root.public_key,
+                    expires.epoch_millis() - 1,
+                )
+                .await?;
+                ensure(res.message == b"expired", "plaintext mismatch")?;
+                Ok(format!(
+                    "rejected 1 ms after expiry as InvalidSealedSenderMessage (libsignal's message for any certificate validation failure: {err}); accepted 1 ms before expiry"
+                ))
+            }
+            Err(err) => Err(format!("rejected for an unexpected reason: {err}")),
         }
     });
 
     step!(report, "sealed_sender.reject_tampered_envelope", {
-        let mut ct = sealed(&mut alice, &bob_addr, &sender_cert, b"tamper", rng).await?;
-        let n = ct.len();
-        ct[n / 2] ^= 0x01;
-        match unseal(&mut bob, &ct, &trust_root.public_key, clock::now_millis()).await {
+        let ct = sealed(&mut alice, &bob_addr, &sender_cert, b"tamper", rng).await?;
+        let mut bad = ct.clone();
+        let n = bad.len();
+        bad[n / 2] ^= 0x01;
+        match unseal_raw(&mut bob, &bad, &trust_root.public_key, clock::now_millis()).await {
             Ok(_) => Err("accepted tampered envelope".into()),
-            Err(err) => Ok(format!("rejected ({err})")),
+            Err(err) => {
+                // The untampered envelope must still decrypt, so the rejection
+                // was caused by the flipped bit.
+                let res =
+                    unseal(&mut bob, &ct, &trust_root.public_key, clock::now_millis()).await?;
+                ensure(res.message == b"tamper", "plaintext mismatch")?;
+                Ok(format!(
+                    "rejected ({err}); untampered envelope then accepted"
+                ))
+            }
         }
     });
 
@@ -843,10 +906,24 @@ fn percent_decode(s: &str) -> R<String> {
     String::from_utf8(out).map_err(ctx("utf8"))
 }
 
-fn tamper_envelope(envelope: &[u8], f: impl FnOnce(&mut pproto::ProvisionEnvelope)) -> Vec<u8> {
-    let mut env = pproto::ProvisionEnvelope::decode(envelope).expect("vector envelope decodes");
-    f(&mut env);
-    env.encode_to_vec()
+fn tamper_envelope(
+    envelope: &[u8],
+    f: impl FnOnce(&mut pproto::ProvisionEnvelope) -> Option<()>,
+) -> R<Vec<u8>> {
+    let mut env = pproto::ProvisionEnvelope::decode(envelope).map_err(ctx("vector envelope"))?;
+    f(&mut env).ok_or("vector envelope is too short to tamper with")?;
+    Ok(env.encode_to_vec())
+}
+
+fn address_frame(id: u64, address: &str) -> Vec<u8> {
+    server_frame(
+        id,
+        "/v1/address",
+        pproto::ProvisioningAddress {
+            address: Some(address.into()),
+        }
+        .encode_to_vec(),
+    )
 }
 
 /// (check name, tampered envelope, recipient key, expected rejection)
@@ -885,15 +962,7 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
 
     step!(report, "provisioning.address_frame_link_url_and_ack", {
         let mut session = ProvisioningSession::new();
-        let address = "Ab+cd/ef==";
-        let frame = server_frame(
-            7,
-            "/v1/address",
-            pproto::ProvisioningAddress {
-                address: Some(address.into()),
-            }
-            .encode_to_vec(),
-        );
+        let frame = address_frame(7, "Ab+cd/ef==");
         let provisioning::FrameEvent::Address { link_url, ack_b64 } =
             session.handle(&frame).map_err(ctx("handle"))?
         else {
@@ -941,6 +1010,9 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
             ..Default::default()
         };
         let envelope = provisioning::encrypt_for_test(&session.public_key(), &message);
+        session
+            .handle(&address_frame(7, "synthetic-address"))
+            .map_err(ctx("address"))?;
         let event = session
             .handle(&server_frame(8, "/v1/message", envelope))
             .map_err(ctx("handle"))?;
@@ -957,6 +1029,40 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
             "summary incomplete",
         )?;
         Ok("envelope frame decrypted, acknowledged, secrets kept in WASM".into())
+    });
+
+    step!(report, "provisioning.reject_out_of_order_frames", {
+        let message = pproto::ProvisionMessage {
+            aci: Some("00000000-0000-4000-8000-000000000002".into()),
+            ..Default::default()
+        };
+        let mut early = ProvisioningSession::new();
+        let envelope = provisioning::encrypt_for_test(&early.public_key(), &message);
+        ensure(
+            early
+                .handle(&server_frame(1, "/v1/message", envelope.clone()))
+                .is_err(),
+            "message accepted before any address",
+        )?;
+        let mut session = ProvisioningSession::new();
+        let envelope = provisioning::encrypt_for_test(&session.public_key(), &message);
+        session
+            .handle(&address_frame(1, "first"))
+            .map_err(ctx("address"))?;
+        ensure(
+            session.handle(&address_frame(2, "second")).is_err(),
+            "second address accepted",
+        )?;
+        session
+            .handle(&server_frame(3, "/v1/message", envelope.clone()))
+            .map_err(ctx("message"))?;
+        ensure(
+            session
+                .handle(&server_frame(4, "/v1/message", envelope))
+                .is_err(),
+            "second message accepted",
+        )?;
+        Ok("message-before-address, second address and second message are rejected".into())
     });
 
     let vector: Vector = serde_json::from_str(vector_json).map_err(ctx("vector json"))?;
@@ -1024,34 +1130,36 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
         (
             "provisioning.reject_flipped_mac",
             tamper_envelope(&envelope, |e| {
-                let b = e.body.as_mut().unwrap();
-                let n = b.len();
-                b[n - 1] ^= 1;
-            }),
+                *e.body.as_mut()?.last_mut()? ^= 1;
+                Some(())
+            })?,
             &private,
             |e| *e == ProvisioningError::BadMac,
         ),
         (
             "provisioning.reject_flipped_ciphertext",
             tamper_envelope(&envelope, |e| {
-                e.body.as_mut().unwrap()[20] ^= 1;
-            }),
+                *e.body.as_mut()?.get_mut(20)? ^= 1;
+                Some(())
+            })?,
             &private,
             |e| *e == ProvisioningError::BadMac,
         ),
         (
             "provisioning.reject_unknown_version",
             tamper_envelope(&envelope, |e| {
-                e.body.as_mut().unwrap()[0] = 2;
-            }),
+                *e.body.as_mut()?.first_mut()? = 2;
+                Some(())
+            })?,
             &private,
             |e| *e == ProvisioningError::BadVersion(2),
         ),
         (
             "provisioning.reject_truncated_body",
             tamper_envelope(&envelope, |e| {
-                e.body.as_mut().unwrap().truncate(40);
-            }),
+                e.body.as_mut()?.truncate(40);
+                Some(())
+            })?,
             &private,
             |e| matches!(e, ProvisioningError::Envelope(_)),
         ),
@@ -1064,7 +1172,8 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
                         .serialize()
                         .to_vec(),
                 );
-            }),
+                Some(())
+            })?,
             &private,
             |e| *e == ProvisioningError::BadMac,
         ),

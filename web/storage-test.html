@@ -12,7 +12,9 @@
     <p class="note">LOCAL functional test with synthetic identities: real libsignal session state
       is encrypted into IndexedDB, the browser is restarted, and messaging resumes. It does not
       contact Signal. It does not demonstrate production security.</p>
-    <form id="manual">
+    <!-- method="dialog": outside a <dialog> a native submission does nothing,
+         so the passphrase can never be sent anywhere even if the script fails. -->
+    <form id="manual" method="dialog">
       <label>Test passphrase <input id="pass" type="password" autocomplete="off" required></label>
       <button type="submit" name="phase" value="setup">Phase 1: set up</button>
       <button type="submit" name="phase" value="resume">Phase 2: resume (after restarting the browser)</button>

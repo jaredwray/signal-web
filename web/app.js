@@ -40,6 +40,11 @@ function startLinking() {
     if (event.event === 'address') {
       gotAddress = true;
       const svg = session.linkQrSvg();
+      if (!svg) {
+        done = true;
+        ws.close();
+        return status('Could not render the link as a QR code.', false);
+      }
       $('#qr-img').src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
       $('#qr').hidden = false;
       status('Scan the QR code with the phone to approve this device.');
@@ -72,8 +77,11 @@ function startLinking() {
 
 async function main() {
   // One active tab per browser profile: protocol state must have one writer.
-  if (!(await acquireTabLock())) {
-    $('#env').textContent = 'signal-web is already open in another tab of this browser. Close it first.';
+  const lock = await acquireTabLock();
+  if (lock !== 'acquired') {
+    $('#env').textContent = lock === 'held-elsewhere'
+      ? 'signal-web is already open in another tab of this browser. Close it first.'
+      : `Cannot guarantee a single active tab (Web Locks ${lock}); refusing to start.`;
     return;
   }
   await init();

@@ -43,6 +43,8 @@ jobs:
           cargo install wasm-bindgen-cli --version 0.2.129 --locked
       - name: Build WASM
         run: bash scripts/build-wasm.sh
+      - name: Probe verdict logic (offline)
+        run: node tools/test-probe-verdict.mjs
       - name: Install npm dependencies and Playwright engines
         run: |
           npm ci

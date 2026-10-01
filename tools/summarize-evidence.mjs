@@ -17,11 +17,11 @@ const local = load(localDir);
 const live = load(liveDir);
 
 const LABEL = {
-  'pw:chromium': 'Chromium (Playwright build)',
-  'pw-channel:chrome': 'Google Chrome',
-  'pw-channel:msedge': 'Microsoft Edge',
-  'pw:firefox': 'Firefox (Playwright build)',
-  'pw:webkit': 'WebKit (Playwright build, not Safari)',
+  'pw:chromium': 'Chromium (Playwright headless shell build)',
+  'pw-channel:chrome': 'Google Chrome (installed)',
+  'pw-channel:msedge': 'Microsoft Edge (installed)',
+  'pw:firefox': 'Firefox (Playwright\'s patched build)',
+  'pw:webkit': 'WebKit (Playwright\'s Linux build; not Safari)',
   'wd:firefox': 'Firefox (installed, geckodriver)',
   'wd:safari': 'Safari (installed, safaridriver)',
 };
@@ -33,6 +33,11 @@ const specOf = (f) => {
 const order = Object.keys(LABEL);
 const sortBySpec = (a, b) => order.indexOf(specOf(a.f)) - order.indexOf(specOf(b.f));
 const row = (cells) => `| ${cells.join(' | ')} |`;
+const tally = (r) => {
+  if (!r) return 'not run';
+  const extra = [r.aborted && `aborted: ${r.aborted}`, r.crashed && `crashed: ${r.crashed}`].filter(Boolean);
+  return `${r.passed ?? 0}/${(r.passed ?? 0) + (r.failed ?? 0)} pass${extra.length ? ` (${extra.join('; ')})` : ''}`;
+};
 
 // --- G1
 const out = [];
@@ -41,7 +46,7 @@ for (const { f, d } of local.filter((x) => x.f.startsWith('crypto-selftest-')).s
   const spec = specOf(f);
   const up = local.find((x) => x.f.startsWith('upstream-tests-including-ignored-') && specOf(x.f) === spec);
   const upCell = up ? `${up.d.counts.ok ?? 0}/${Object.values(up.d.counts).reduce((a, b) => a + b, 0)} ok` : 'not run';
-  out.push(row([LABEL[spec] ?? spec, d.browser, `${d.passed}/${d.passed + d.failed} pass`, upCell]));
+  out.push(row([LABEL[spec] ?? spec, d.browser, tally(d), upCell]));
 }
 
 // --- G5
@@ -50,36 +55,55 @@ for (const { f, d } of local.filter((x) => x.f.startsWith('storage-test-')).sort
   const spec = specOf(f);
   const p1 = d.phase_setup ?? {};
   const p2 = d.phase_resume_after_restart ?? {};
-  out.push(row([LABEL[spec] ?? spec, d.restart, `${p1.passed ?? 0}/${(p1.passed ?? 0) + (p1.failed ?? 0)}`,
-    `${p2.passed ?? 0}/${(p2.passed ?? 0) + (p2.failed ?? 0)}`, String(p1.storage_persist_granted)]));
+  // A phase whose report names another phase did not run (see run-local-tests).
+  const phaseCell = (p, want) => (p.phase && p.phase !== want ? `INVALID (report from phase "${p.phase}")` : tally(p));
+  out.push(row([LABEL[spec] ?? spec, d.restart, phaseCell(p1, 'setup'), phaseCell(p2, 'resume'), String(p1.storage_persist_granted)]));
 }
 
 // --- G2
 const SIGNAL = ['chat.signal.org', 'grpc.chat.signal.org', 'storage.signal.org', 'cdn.signal.org', 'cdn2.signal.org', 'cdn3.signal.org', 'cdsi.signal.org', 'svr2.signal.org'];
-out.push('', '#### G2 table', '', row(['Browser', 'Version', 'Control `updates.signal.org` (CORS fetch / no-cors / WS)', 'Signal hosts: readable CORS fetch', 'Signal hosts: no-cors reachable', 'Provisioning WebSocket', 'Browser\'s own TLS verdict (navigation / DevTools)', 'Verdict']), row(Array(8).fill('---')));
-for (const { f, d } of live.filter((x) => x.f.startsWith('probe-') && !x.f.includes('cloud-container')).sort(sortBySpec)) {
+const CONTROL = 'updates.signal.org';
+const probes = live.filter((x) => x.f.startsWith('probe-') && !x.f.includes('cloud-container')).sort(sortBySpec);
+const isReadable = (r) => Boolean(r && (r.readable ?? (r.ok && (r.type === 'cors' || r.type === 'basic'))));
+const wsOutcome = (r) => r.events.at(-1).replace(/, wasClean.*$/, ')');
+out.push('', '#### G2 table', '', row(['Browser', 'Version', `Control \`${CONTROL}\`: CORS fetch / no-cors / navigation`, 'Signal hosts: readable CORS fetch', 'Signal hosts: no-cors reachable', 'Provisioning WebSocket', 'Browser named a certificate problem', 'Browser\'s own error', 'Verdict']), row(Array(9).fill('---')));
+for (const { f, d } of probes) {
   const spec = specOf(f);
   const res = d.page_report.results;
   const find = (kind, host) => res.find((r) => r.kind === kind && new URL(r.url).host === host);
-  const ctl = ['fetch/cors', 'fetch/no-cors', 'websocket'].map((k) => {
-    const r = find(k, 'updates.signal.org');
+  const hosts = d.verdict.hosts ?? {};
+  const ctlFetch = ['fetch/cors', 'fetch/no-cors'].map((k) => {
+    const r = find(k, CONTROL);
     if (!r) return '-';
-    if (k === 'websocket') return r.events.at(-1).replace(/, wasClean.*$/, ')');
     return r.ok ? `${r.type} ${r.status}` : 'failed';
-  }).join(' / ');
-  const cors = SIGNAL.filter((h) => find('fetch/cors', h)?.ok).length;
+  });
+  const ctlNav = hosts[CONTROL]?.navigation;
+  const ctl = [...ctlFetch, ctlNav ? (ctlNav.ok ? `reached${ctlNav.status ? ` (${ctlNav.status})` : ''}` : 'failed') : '-'].join(' / ');
+  const cors = SIGNAL.filter((h) => isReadable(find('fetch/cors', h))).length;
   const corsTotal = SIGNAL.filter((h) => find('fetch/cors', h)).length;
   const nc = SIGNAL.filter((h) => find('fetch/no-cors', h)?.ok).length;
-  const ws = [...new Set(res.filter((r) => r.kind === 'websocket' && r.url.includes('provisioning') && !r.url.includes('updates')).map((r) => r.events.at(-1).replace(/, wasClean.*$/, ')')))].join(', ');
-  const hosts = d.verdict.hosts ?? {};
-  const navErr = [...new Set(SIGNAL.map((h) => hosts[h]?.navigation).filter((n) => n && !n.ok).map((n) => n.error.replace(/ at https?:\/\/\S+/, '').replace(/^page\.goto: /, '')))];
-  const dt = [...new Set(SIGNAL.flatMap((h) => hosts[h]?.devtools_errors ?? []))].filter((e) => /CERT/.test(e)).map((e) => e.replace('Error in connection establishment: ', 'WS: '));
+  const ws = [...new Set(res.filter((r) => r.kind === 'websocket' && new URL(r.url).host !== CONTROL).map(wsOutcome))].join(', ');
+  const navErr = [...new Set(SIGNAL.map((h) => hosts[h]?.navigation).filter((n) => n && !n.ok)
+    .map((n) => n.error.replace(/ at https?:\/\/\S+/, '').replace(/^page\.goto: /, '')))];
+  const dt = [...new Set(SIGNAL.flatMap((h) => hosts[h]?.devtools_errors ?? []))].filter((e) => /CERT/.test(e))
+    .map((e) => e.replace('Error in connection establishment: ', 'WebSocket: '));
   const rejected = SIGNAL.filter((h) => hosts[h]?.certificate_rejected_by_browser).length;
-  const navFailed = SIGNAL.filter((h) => hosts[h]?.navigation_failed).length;
-  const ctlNav = hosts['updates.signal.org']?.navigation;
-  out.push(row([LABEL[spec] ?? spec, d.browser, `${ctl}; navigation ${ctlNav ? (ctlNav.ok ? 'reached' : 'failed') : '-'}`,
-    `${cors}/${corsTotal}`, `${nc}/${SIGNAL.length}`, ws,
-    `explicit cert rejection ${rejected}/${SIGNAL.length}, navigation failed ${navFailed}/${SIGNAL.length}: ${[...navErr, ...dt].join('; ') || '-'}`,
-    d.verdict.validity]));
+  const tls = SIGNAL.filter((h) => hosts[h]?.tls_handshake_failed_unspecified).length;
+  out.push(row([LABEL[spec] ?? spec, d.browser, ctl, `${cors}/${corsTotal}`, `${nc}/${SIGNAL.length}`, ws,
+    `${rejected}/${SIGNAL.length}${tls ? ` (+ WebSocket close 1015 on ${tls})` : ''}`,
+    [...navErr, ...dt].join('; ') || '-', d.verdict.validity]));
+}
+
+// --- G2 NetLog: the certificate chains Chromium-family browsers received.
+out.push('', '#### G2 NetLog table', '', row(['Browser', 'Signal-host chains received', 'Leaf issuer', 'Signal root sent in chain', 'Interception check']), row(Array(5).fill('---')));
+for (const { f, d } of probes.filter((x) => x.d.netlog)) {
+  const spec = specOf(f);
+  const chains = (d.netlog.certificate_chains_received ?? []).filter((c) =>
+    SIGNAL.some((h) => (c.names ?? [c.host]).some((n) => n === h || (n.startsWith('*.') && h.endsWith(n.slice(1))))));
+  const short = (c) => (c.names?.[0] ?? c.host).replace('.signal.org', '');
+  const issuers = [...new Set(chains.map((c) => (c.leaf_issuer.match(/CN=([^,]+)/) ?? [])[1] ?? c.leaf_issuer))];
+  const withRoot = chains.filter((c) => c.includes_signal_root).map(short);
+  out.push(row([LABEL[spec] ?? spec, chains.map(short).join(', ') || 'none', issuers.join('; ') || '-',
+    withRoot.length ? withRoot.join(', ') : 'none', d.verdict.interception_check ?? '-']));
 }
 console.log(out.join('\n'));

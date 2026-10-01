@@ -47,7 +47,15 @@ const server = createServer((req, res) => {
     res.writeHead(405, { Allow: 'GET, HEAD' }).end();
     return;
   }
-  let file = normalize(join(root, decodeURIComponent(path)));
+  let decoded;
+  try {
+    decoded = decodeURIComponent(path);
+  } catch {
+    log({ ...entry, status: 400 });
+    res.writeHead(400).end();
+    return;
+  }
+  let file = normalize(join(root, decoded));
   if (file !== root && !file.startsWith(root + sep)) {
     log({ ...entry, status: 403 });
     res.writeHead(403).end();
@@ -64,7 +72,7 @@ const server = createServer((req, res) => {
       // Signal origins the client may contact (see VALIDATION_REPORT.md).
       'Content-Security-Policy':
         "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; " +
-        "img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'self'; " +
+        "img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'; " +
         "connect-src 'self' https://*.signal.org wss://*.signal.org",
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'no-referrer',

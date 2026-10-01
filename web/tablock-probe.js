@@ -2,4 +2,4 @@
 // while another context holds the lock (see storage-test.js).
 import { acquireTabLock } from './lib/tablock.js';
 
-acquireTabLock().then((acquired) => parent.postMessage({ tablockAcquired: acquired }, location.origin));
+acquireTabLock().then((state) => parent.postMessage({ tablock: state }, location.origin));

@@ -9,9 +9,14 @@
 // - commit() writes several records in ONE IndexedDB transaction, which is
 //   all-or-nothing, with durability 'strict' where the browser supports it.
 //   A client must commit new ratchet state before acknowledging a message.
-// - A copied browser profile yields only the salt and ciphertexts; recovering
-//   the data requires guessing the passphrase. PBKDF2 is GPU-friendly, so a
-//   weak passphrase is weak protection (see VALIDATION_REPORT.md).
+// - A copied browser profile yields the salt, the ciphertexts and, in the
+//   clear, record ids and sizes; recovering the data requires guessing the
+//   passphrase. PBKDF2 is GPU-friendly, so a weak passphrase is weak
+//   protection (see VALIDATION_REPORT.md).
+// - No rollback protection: someone who can write to the profile can put
+//   back an older (authentic) ciphertext of a record, and the client would
+//   resume from that older ratchet state. Detecting this needs a counter
+//   kept outside the profile; this spike has none.
 
 const DB_NAME = 'signal-web';
 const DB_VERSION = 1;
@@ -35,7 +40,8 @@ const req = (r) => new Promise((resolve, reject) => {
 
 const done = (tx) => new Promise((resolve, reject) => {
   tx.oncomplete = () => resolve();
-  tx.onerror = () => reject(tx.error);
+  // A failed request's error event bubbles here before tx.error is set.
+  tx.onerror = (e) => reject(e.target?.error ?? tx.error);
   tx.onabort = () => reject(tx.error ?? new Error('transaction aborted'));
 });
 
@@ -49,7 +55,9 @@ export function openDb() {
 }
 
 async function deriveKey(passphrase, salt, iterations) {
-  const base = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  // NFC so that the same passphrase typed on different systems (composed vs
+  // decomposed accents) derives the same key.
+  const base = await crypto.subtle.importKey('raw', enc.encode(passphrase.normalize('NFC')), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey(
     { name: 'PBKDF2', hash: 'SHA-256', salt, iterations },
     base,
@@ -102,9 +110,17 @@ export class Vault {
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveKey(passphrase, salt, ITERATIONS);
     const check = await seal(key, KEY_CHECK_ID, enc.encode(KEY_CHECK_TEXT));
+    // add(), not put(): if another context created a vault while this one was
+    // deriving its key, the write fails instead of replacing that vault's salt.
     const tx = db.transaction('meta', 'readwrite', { durability: 'strict' });
-    tx.objectStore('meta').put({ v: 1, kdf: { name: 'PBKDF2-SHA256', iterations: ITERATIONS, salt }, check }, 'vault');
-    await done(tx);
+    tx.objectStore('meta').add({ v: 1, kdf: { name: 'PBKDF2-SHA256', iterations: ITERATIONS, salt }, check }, 'vault');
+    try {
+      await done(tx);
+    } catch (err) {
+      db.close();
+      if (err?.name === 'ConstraintError') throw new VaultError('EXISTS', 'a vault already exists in this browser profile');
+      throw err;
+    }
     return new Vault(db, key);
   }
 

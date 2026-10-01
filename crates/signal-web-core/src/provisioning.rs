@@ -376,8 +376,12 @@ impl ProvisioningSession {
             return Err(ProvisioningError::Frame("unexpected verb"));
         }
         let ack_b64 = base64::engine::general_purpose::STANDARD.encode(ack(id));
+        // The server sends exactly one address, then at most one message.
         match req.path.as_deref() {
             Some("/v1/address") => {
+                if self.address.is_some() {
+                    return Err(ProvisioningError::Frame("duplicate provisioning address"));
+                }
                 let addr =
                     proto::ProvisioningAddress::decode(req.body.unwrap_or_default().as_slice())
                         .map_err(|_| ProvisioningError::Frame("bad ProvisioningAddress"))?
@@ -389,6 +393,14 @@ impl ProvisioningSession {
                 Ok(FrameEvent::Address { link_url, ack_b64 })
             }
             Some("/v1/message") => {
+                if self.address.is_none() {
+                    return Err(ProvisioningError::Frame(
+                        "provisioning message before an address",
+                    ));
+                }
+                if self.provisioned.is_some() {
+                    return Err(ProvisioningError::Frame("duplicate provisioning message"));
+                }
                 let message =
                     decrypt_envelope(&self.key_pair.private_key, &req.body.unwrap_or_default())?;
                 let summary = ProvisionSummary::from(&message);

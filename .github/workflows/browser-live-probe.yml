@@ -1,7 +1,9 @@
 # LIVE network probe (opt-in): loads web/probe.html in real browsers on an
 # ordinary network and lets it contact Signal's public hosts directly.
 # No Signal account and no credentials are used; one attempt per target.
-# Runs only when the probe itself changes, or on manual dispatch.
+# Runs only when the probe itself changes, or on manual dispatch. Pull
+# requests from forks never run it: the probe page decides which hosts are
+# contacted, so only this repository's own branches may change that.
 name: browser-live-probe
 
 on:
@@ -15,6 +17,7 @@ on:
       - web/app.js
       - web/lib/**
       - tools/run-probe.mjs
+      - tools/probe-verdict.mjs
       - tools/browsers.mjs
       - tools/run-local-tests.mjs
       - tools/static-server.mjs
@@ -37,6 +40,7 @@ env:
 jobs:
   linux:
     name: Linux (Chromium, Chrome, Edge, Firefox, WebKit)
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -79,6 +83,7 @@ jobs:
 
   safari:
     name: macOS (Safari via safaridriver)
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: macos-15
     timeout-minutes: 45
     steps:

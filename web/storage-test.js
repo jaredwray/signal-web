@@ -51,10 +51,10 @@ function frameLockProbe(timeoutMs = 15000) {
     const frame = document.createElement('iframe');
     frame.hidden = true;
     window.addEventListener('message', function on(e) {
-      if (e.origin !== location.origin || !('tablockAcquired' in e.data)) return;
+      if (e.origin !== location.origin || !('tablock' in e.data)) return;
       window.removeEventListener('message', on);
       frame.remove();
-      resolve(e.data.tablockAcquired);
+      resolve(e.data.tablock);
     });
     frame.src = 'tablock-probe.html';
     document.body.append(frame);
@@ -71,16 +71,26 @@ async function setup(pass) {
   await Vault.destroy();
   let vault;
   await check('tablock.this_tab_acquires_lock', async () => {
-    assert(await acquireTabLock(), 'could not acquire the tab lock');
+    const state = await acquireTabLock();
+    assert(state === 'acquired', `expected "acquired", got "${state}"`);
     return 'Web Locks lock held by this page';
   });
   await check('tablock.second_context_refused', async () => {
-    assert((await frameLockProbe()) === false, 'a second same-origin context acquired the lock');
-    return 'a second same-origin context was refused while this page holds the lock';
+    // A same-origin iframe stands in for a second tab: Web Locks are scoped
+    // to the origin, so the lock manager treats both the same way.
+    const state = await frameLockProbe();
+    assert(state === 'held-elsewhere', `expected "held-elsewhere" in the second context, got "${state}"`);
+    return 'a second same-origin context (iframe) was told the lock is held elsewhere';
   });
-  await check('vault.create', async () => {
-    vault = await Vault.create(pass);
-    return 'PBKDF2-SHA256 (600k) -> non-extractable AES-256-GCM key';
+  await check('vault.create_once_under_race', async () => {
+    // Two contexts creating a vault at the same time: exactly one may win.
+    const results = await Promise.allSettled([Vault.create(pass), Vault.create(pass)]);
+    const created = results.filter((r) => r.status === 'fulfilled');
+    const refused = results.filter((r) => r.status === 'rejected' && r.reason instanceof VaultError && r.reason.code === 'EXISTS');
+    const seen = results.map((r) => (r.status === 'fulfilled' ? 'created' : r.reason?.code ?? String(r.reason)));
+    assert(created.length === 1 && refused.length === 1, `expected one vault and one EXISTS refusal, got ${seen.join(', ')}`);
+    vault = created[0].value;
+    return 'two concurrent create() calls: one vault (PBKDF2-SHA256 600k -> non-extractable AES-256-GCM key), one refused with EXISTS';
   });
   const conv = LocalConversation.create();
   await check('conversation.messages_before_restart', async () => exchange(conv, 'before restart', 5));
