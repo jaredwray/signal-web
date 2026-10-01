@@ -1,36 +1,182 @@
 {
   "kind": "live-browser-network-probe",
   "label": "LIVE network test from an ordinary browser origin; no Signal account or credentials used",
-  "generated_at": "2026-10-01T13:37:41.148Z",
+  "generated_at": "2026-10-01T13:58:03.252Z",
   "browser_spec": "pw:chromium",
   "browser": "141.0.7390.37",
   "origin": "http://localhost:8182 (static files only)",
   "request_interception": "none",
   "network_path": "browser default",
   "verdict": {
-    "control_public_ca_host_reachable": false,
-    "signal_hosts_reachable_no_cors": [],
-    "signal_hosts_unreachable_no_cors": [
-      "https://chat.signal.org/v1/certificate/delivery",
-      "https://grpc.chat.signal.org/",
-      "https://storage.signal.org/v1/storage/manifest",
-      "https://cdn.signal.org/attachments/probe-nonexistent",
-      "https://cdn2.signal.org/attachments/probe-nonexistent",
-      "https://cdn3.signal.org/attachments/probe-nonexistent",
-      "https://cdsi.signal.org/",
-      "https://svr2.signal.org/"
-    ],
-    "cors_readable_responses": [],
-    "websockets_opened": [],
+    "hosts": {
+      "chat.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": "error -> close(code=1006, wasClean=false, reason=\"\")",
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://chat.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID",
+          "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      },
+      "grpc.chat.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": "error -> close(code=1006, wasClean=false, reason=\"\")",
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://grpc.chat.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID",
+          "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      },
+      "storage.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://storage.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      },
+      "cdn.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cdn.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      },
+      "cdn2.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cdn2.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      },
+      "cdn3.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cdn3.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      },
+      "cdsi.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cdsi.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      },
+      "svr2.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://svr2.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      },
+      "updates.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": "error -> close(code=1006, wasClean=false, reason=\"\")",
+        "navigation": {
+          "ok": false,
+          "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://updates.signal.org/"
+        },
+        "netlog_leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "devtools_errors": [
+          "net::ERR_CERT_AUTHORITY_INVALID",
+          "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+        ],
+        "certificate_rejected_by_browser": true
+      }
+    },
     "validity": "INVALID_FOR_SIGNAL_CONCLUSIONS",
-    "reason": "the network re-terminated TLS (issuer seen: CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic)"
+    "reason": "the network re-terminated TLS (foreign certificate issuer seen, or the publicly trusted control was rejected)"
+  },
+  "navigation": {
+    "chat.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://chat.signal.org/"
+    },
+    "grpc.chat.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://grpc.chat.signal.org/"
+    },
+    "storage.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://storage.signal.org/"
+    },
+    "cdn.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cdn.signal.org/"
+    },
+    "cdn2.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cdn2.signal.org/"
+    },
+    "cdn3.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cdn3.signal.org/"
+    },
+    "cdsi.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cdsi.signal.org/"
+    },
+    "svr2.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://svr2.signal.org/"
+    },
+    "updates.signal.org": {
+      "ok": false,
+      "error": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://updates.signal.org/"
+    }
   },
   "page_report": {
     "kind": "browser-network-probe",
     "origin": "http://localhost:8182",
     "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.37 Safari/537.36",
     "secure_context": true,
-    "at": "2026-10-01T13:37:40.902Z",
+    "at": "2026-10-01T13:57:58.242Z",
     "results": [
       {
         "label": "chat REST",
@@ -39,7 +185,7 @@
         "url": "https://chat.signal.org/v1/certificate/delivery",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 603
+        "ms": 508
       },
       {
         "label": "chat REST",
@@ -48,7 +194,7 @@
         "url": "https://chat.signal.org/v1/certificate/delivery",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 474
       },
       {
         "label": "chat (grpc host)",
@@ -57,7 +203,7 @@
         "url": "https://grpc.chat.signal.org/",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 475
+        "ms": 432
       },
       {
         "label": "chat (grpc host)",
@@ -66,7 +212,7 @@
         "url": "https://grpc.chat.signal.org/",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 576
       },
       {
         "label": "storage",
@@ -75,7 +221,7 @@
         "url": "https://storage.signal.org/v1/storage/manifest",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 430
+        "ms": 395
       },
       {
         "label": "storage",
@@ -84,7 +230,7 @@
         "url": "https://storage.signal.org/v1/storage/manifest",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 407
       },
       {
         "label": "cdn0",
@@ -93,7 +239,7 @@
         "url": "https://cdn.signal.org/attachments/probe-nonexistent",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 400
+        "ms": 677
       },
       {
         "label": "cdn0",
@@ -102,7 +248,7 @@
         "url": "https://cdn.signal.org/attachments/probe-nonexistent",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 545
       },
       {
         "label": "cdn2",
@@ -111,7 +257,7 @@
         "url": "https://cdn2.signal.org/attachments/probe-nonexistent",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 474
+        "ms": 555
       },
       {
         "label": "cdn2",
@@ -120,7 +266,7 @@
         "url": "https://cdn2.signal.org/attachments/probe-nonexistent",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 361
       },
       {
         "label": "cdn3",
@@ -129,7 +275,7 @@
         "url": "https://cdn3.signal.org/attachments/probe-nonexistent",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 358
+        "ms": 434
       },
       {
         "label": "cdn3",
@@ -138,7 +284,7 @@
         "url": "https://cdn3.signal.org/attachments/probe-nonexistent",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 605
       },
       {
         "label": "cdsi",
@@ -147,7 +293,7 @@
         "url": "https://cdsi.signal.org/",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 427
+        "ms": 725
       },
       {
         "label": "cdsi",
@@ -156,7 +302,7 @@
         "url": "https://cdsi.signal.org/",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 452
       },
       {
         "label": "svr2",
@@ -165,7 +311,7 @@
         "url": "https://svr2.signal.org/",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 455
+        "ms": 544
       },
       {
         "label": "svr2",
@@ -174,7 +320,7 @@
         "url": "https://svr2.signal.org/",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 559
       },
       {
         "label": "CONTROL updates",
@@ -183,7 +329,7 @@
         "url": "https://updates.signal.org/desktop/latest.yml",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 419
+        "ms": 595
       },
       {
         "label": "CONTROL updates",
@@ -192,7 +338,7 @@
         "url": "https://updates.signal.org/desktop/latest.yml",
         "ok": false,
         "error": "TypeError: Failed to fetch",
-        "ms": 0
+        "ms": 547
       },
       {
         "label": "provisioning (chat)",
@@ -203,7 +349,7 @@
           "error",
           "close(code=1006, wasClean=false, reason=\"\")"
         ],
-        "ms": 520
+        "ms": 441
       },
       {
         "label": "provisioning (grpc host)",
@@ -214,7 +360,7 @@
           "error",
           "close(code=1006, wasClean=false, reason=\"\")"
         ],
-        "ms": 395
+        "ms": 489
       },
       {
         "label": "CONTROL updates",
@@ -225,46 +371,10 @@
           "error",
           "close(code=1006, wasClean=false, reason=\"\")"
         ],
-        "ms": 384
+        "ms": 467
       }
     ],
     "console": [
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://chat.signal.org/v1/certificate/delivery. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://grpc.chat.signal.org/. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://storage.signal.org/v1/storage/manifest. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://cdn.signal.org/attachments/probe-nonexistent. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://cdn2.signal.org/attachments/probe-nonexistent. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://cdn3.signal.org/attachments/probe-nonexistent. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://cdsi.signal.org/. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://svr2.signal.org/. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
-      {
-        "type": "error",
-        "text": "Fetch API cannot load https://updates.signal.org/desktop/latest.yml. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
-      },
       {
         "type": "error",
         "text": "WebSocket connection to 'wss://chat.signal.org/v1/websocket/provisioning/' failed: Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
@@ -281,82 +391,145 @@
   },
   "devtools_network": [
     {
-      "id": "7523.6",
+      "id": "10033.6",
       "url": "https://chat.signal.org/v1/certificate/delivery",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.7",
+      "id": "10033.7",
+      "url": "https://chat.signal.org/v1/certificate/delivery",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.8",
       "url": "https://grpc.chat.signal.org/",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.8",
+      "id": "10033.9",
+      "url": "https://grpc.chat.signal.org/",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.10",
       "url": "https://storage.signal.org/v1/storage/manifest",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.9",
+      "id": "10033.11",
+      "url": "https://storage.signal.org/v1/storage/manifest",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.12",
       "url": "https://cdn.signal.org/attachments/probe-nonexistent",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.10",
+      "id": "10033.13",
+      "url": "https://cdn.signal.org/attachments/probe-nonexistent",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.14",
       "url": "https://cdn2.signal.org/attachments/probe-nonexistent",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.11",
+      "id": "10033.15",
+      "url": "https://cdn2.signal.org/attachments/probe-nonexistent",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.16",
       "url": "https://cdn3.signal.org/attachments/probe-nonexistent",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.12",
+      "id": "10033.17",
+      "url": "https://cdn3.signal.org/attachments/probe-nonexistent",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.18",
       "url": "https://cdsi.signal.org/",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.13",
+      "id": "10033.19",
+      "url": "https://cdsi.signal.org/",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.20",
       "url": "https://svr2.signal.org/",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.14",
+      "id": "10033.21",
+      "url": "https://svr2.signal.org/",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.22",
       "url": "https://updates.signal.org/desktop/latest.yml",
       "type": "Fetch",
       "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
       "cors_error": null
     },
     {
-      "id": "7523.15",
+      "id": "10033.23",
+      "url": "https://updates.signal.org/desktop/latest.yml",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "10033.24",
       "url": "wss://chat.signal.org/v1/websocket/provisioning/",
       "type": "WebSocket",
       "ws_error": "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
     },
     {
-      "id": "7523.16",
+      "id": "10033.25",
       "url": "wss://grpc.chat.signal.org/v1/websocket/provisioning/",
       "type": "WebSocket",
       "ws_error": "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
     },
     {
-      "id": "7523.17",
+      "id": "10033.26",
       "url": "wss://updates.signal.org/v1/websocket/provisioning/",
       "type": "WebSocket",
       "ws_error": "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
@@ -371,10 +544,10 @@
       {
         "host": "chat.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:37:40 2026 GMT -> Oct  1 13:37:40 2027 GMT",
+        "leaf_valid": "Oct  1 12:57:58 2026 GMT -> Oct  1 13:57:58 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "CE:AF:78:39:96:23:E8:F4:59:68:9A:81:B9:AB:73:82:AA:F8:AE:F3:BD:83:B1:41:1A:3E:CF:FA:26:C3:D9:C3",
+          "D5:27:AC:06:44:3A:8C:5B:B7:0C:47:06:EF:14:30:C1:14:04:B5:4A:6C:41:84:72:8E:82:EF:AE:1A:69:59:A6",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false
@@ -382,10 +555,10 @@
       {
         "host": "grpc.chat.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:37:40 2026 GMT -> Oct  1 13:37:40 2027 GMT",
+        "leaf_valid": "Oct  1 12:57:59 2026 GMT -> Oct  1 13:57:59 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "99:F5:6D:8C:F7:58:F3:82:3A:38:4D:36:88:85:8C:EF:3D:1C:47:76:6E:01:9F:30:85:A4:36:73:AA:87:FD:2E",
+          "77:AE:DA:93:55:04:86:14:DC:EF:F1:B4:B3:E3:36:4B:0F:A2:FB:B3:E8:93:CB:BD:D3:DD:8A:94:D3:3F:5C:50",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false
@@ -393,10 +566,10 @@
       {
         "host": "storage.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:37:37 2026 GMT -> Oct  1 13:37:37 2027 GMT",
+        "leaf_valid": "Oct  1 12:58:00 2026 GMT -> Oct  1 13:58:00 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "10:29:1A:40:13:23:57:C4:40:FD:3C:FA:0F:47:51:48:BC:BB:2C:93:43:B5:77:6D:96:AC:96:2E:79:0A:47:B3",
+          "31:68:1D:B7:53:D1:91:56:4D:D7:68:99:83:8A:C7:02:BB:C8:86:BA:FB:22:5F:39:33:73:89:F5:DF:8B:E0:92",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false
@@ -404,10 +577,10 @@
       {
         "host": "cdn.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:28:00 2026 GMT -> Oct  1 13:28:00 2027 GMT",
+        "leaf_valid": "Oct  1 12:58:00 2026 GMT -> Oct  1 13:58:00 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "4A:89:6B:89:F1:99:96:50:7E:D8:5D:FC:53:65:17:B3:9A:94:5D:04:C0:B0:8C:72:87:04:3A:43:48:2C:01:87",
+          "DF:0C:7C:24:FC:C5:89:10:38:8D:51:B5:AA:BB:B0:DB:CF:D5:12:63:BC:BF:F0:26:CB:09:46:11:1E:43:7E:5A",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false
@@ -415,10 +588,10 @@
       {
         "host": "cdn2.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:37:37 2026 GMT -> Oct  1 13:37:37 2027 GMT",
+        "leaf_valid": "Oct  1 12:58:01 2026 GMT -> Oct  1 13:58:01 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "44:A7:AF:EE:0F:B6:B3:BB:79:8A:AF:D8:F1:84:E0:E0:E0:BD:4D:2D:5C:8A:F1:3B:E0:9D:67:DE:12:06:07:78",
+          "9C:16:FD:76:76:32:C1:0D:36:F8:3B:4F:D4:3B:4E:37:8A:0B:33:19:EB:DC:C4:21:41:98:0E:96:72:39:84:F8",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false
@@ -426,10 +599,10 @@
       {
         "host": "cdn3.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:37:38 2026 GMT -> Oct  1 13:37:38 2027 GMT",
+        "leaf_valid": "Oct  1 12:58:01 2026 GMT -> Oct  1 13:58:01 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "29:20:16:B1:80:61:F4:3C:D6:A2:7C:31:C1:2A:C2:0E:58:89:68:53:16:48:E6:C4:9D:15:4C:CA:2B:63:CD:2B",
+          "64:E7:D7:C8:DB:DD:75:57:1F:83:0C:ED:BA:9F:77:8E:F2:EC:D6:A8:B9:6A:95:F7:EA:8A:02:E3:31:D6:69:61",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false
@@ -437,10 +610,10 @@
       {
         "host": "cdsi.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:37:38 2026 GMT -> Oct  1 13:37:38 2027 GMT",
+        "leaf_valid": "Oct  1 12:58:02 2026 GMT -> Oct  1 13:58:02 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "B2:55:B0:1F:33:97:C1:CD:FE:2B:67:18:24:28:A1:0C:59:C2:B5:B1:53:42:D6:E0:0B:83:1A:7D:02:FD:BC:82",
+          "E9:CF:35:D0:50:2E:8C:5C:00:07:AA:4E:EF:4D:A7:DC:AF:CA:D4:29:74:6C:A8:01:9E:6F:84:10:E3:E2:7C:63",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false
@@ -448,10 +621,10 @@
       {
         "host": "svr2.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:37:39 2026 GMT -> Oct  1 13:37:39 2027 GMT",
+        "leaf_valid": "Oct  1 12:58:02 2026 GMT -> Oct  1 13:58:02 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "D8:FF:84:FD:39:BF:F8:25:17:2D:52:FF:0B:BA:C6:00:F6:E9:A6:EF:FD:FC:63:C6:4F:CD:F0:E4:A2:91:95:42",
+          "B0:D4:38:29:FD:A4:D2:A6:B9:45:82:2A:49:A7:5A:B3:95:41:1C:89:8F:89:BB:BB:2B:9E:B9:B0:8B:41:6F:89",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false
@@ -459,10 +632,10 @@
       {
         "host": "updates.signal.org",
         "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
-        "leaf_valid": "Oct  1 12:37:40 2026 GMT -> Oct  1 13:37:40 2027 GMT",
+        "leaf_valid": "Oct  1 12:58:03 2026 GMT -> Oct  1 13:58:03 2027 GMT",
         "chain_length": 2,
         "chain_sha256": [
-          "2F:89:B2:CB:25:A4:0C:06:AE:55:E3:55:FB:4C:20:85:AA:C6:B0:C4:E0:C7:D9:36:66:15:B3:73:2E:42:4C:8F",
+          "AA:62:8D:60:37:3F:D9:96:03:62:1D:D0:46:89:CF:4E:27:09:CB:56:E1:AE:71:BE:4B:9F:2E:E1:B9:D9:E6:4C",
           "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
         ],
         "includes_signal_root": false

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>signal-web spike</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>signal-web: browser-only Signal client spike</h1>
+    <p class="note">Unofficial experiment, not affiliated with Signal. Do not use it for sensitive
+      conversations. See <code>VALIDATION_REPORT.md</code>.</p>
+    <p id="env" role="status">Loading WebAssembly…</p>
+
+    <section>
+      <h2>Link this browser as a new device</h2>
+      <p>Uses an authorized <em>test</em> account. The browser connects directly to
+        <code>wss://chat.signal.org/v1/websocket/provisioning/</code>. A QR code appears only after
+        Signal's server assigns a provisioning address.</p>
+      <p><button id="link" disabled>Start linking</button></p>
+      <p id="link-status" role="status"></p>
+      <div id="qr" hidden>
+        <img id="qr-img" alt="Signal device-link QR code" width="256" height="256">
+        <p>On the phone: Signal → Settings → Linked devices → Link new device, then scan.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Diagnostics</h2>
+      <ul>
+        <li><a href="selftest.html">Local cryptography self-test (WASM)</a></li>
+        <li><a href="probe.html">Direct network probe of Signal hosts (live)</a></li>
+        <li><a href="storage-test.html">Encrypted storage test (local)</a></li>
+      </ul>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

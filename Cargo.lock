@@ -87,6 +87,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
+name = "base64"
+version = "0.22.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+
+[[package]]
 name = "bindgen"
 version = "0.72.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1289,6 +1295,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "qrcode"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d68782463e408eb1e668cf6152704bd856c78c5b6417adaee3203d8f4c1fc9ec"
+
+[[package]]
 name = "quote"
 version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1569,7 +1581,9 @@ dependencies = [
 name = "signal-web-core"
 version = "0.0.1"
 dependencies = [
+ "base64",
  "console_error_panic_hook",
+ "futures-util",
  "getrandom 0.3.4",
  "getrandom 0.4.3",
  "hex",
@@ -1579,6 +1593,7 @@ dependencies = [
  "libsignal-core",
  "libsignal-protocol",
  "prost",
+ "qrcode",
  "rand 0.9.5",
  "serde",
  "serde_json",

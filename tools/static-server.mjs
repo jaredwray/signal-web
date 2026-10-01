@@ -64,7 +64,7 @@ const server = createServer((req, res) => {
       // Signal origins the client may contact (see VALIDATION_REPORT.md).
       'Content-Security-Policy':
         "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; " +
-        "img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; " +
+        "img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'self'; " +
         "connect-src 'self' https://*.signal.org wss://*.signal.org",
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'no-referrer',

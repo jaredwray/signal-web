@@ -1,7 +1,7 @@
 // Runs the Rust/WASM self-test (crates/signal-web-core/src/selftest.rs) and
 // renders the report. The report is also exposed as window.__selftest so the
 // Playwright runner can collect it.
-import init, { libsignalVersion, runProtocolSelftest } from './pkg/signal_web_core.js';
+import init, { libsignalVersion, runProtocolSelftest, runProvisioningSelftest } from './pkg/signal_web_core.js';
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -14,6 +14,14 @@ async function main() {
     `crossOriginIsolated=${self.crossOriginIsolated} · ${navigator.userAgent}`;
 
   const report = JSON.parse(await runProtocolSelftest());
+  // Linked-device provisioning crypto/framing, checked against an independent
+  // test vector produced by scripts/make_provisioning_vector.py.
+  const vector = await (await fetch('testdata/provisioning-vector.json')).text();
+  const prov = JSON.parse(await runProvisioningSelftest(vector));
+  report.checks.push(...prov.checks);
+  report.passed += prov.passed;
+  report.failed += prov.failed;
+  if (prov.aborted) report.aborted = [report.aborted, prov.aborted].filter(Boolean).join('; ');
   report.wasm_instantiate_ms = loadMs;
   report.user_agent = navigator.userAgent;
 

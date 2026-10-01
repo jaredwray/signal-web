@@ -7,7 +7,9 @@
 use wasm_bindgen::prelude::*;
 
 mod clock;
+pub mod provisioning;
 mod selftest;
+pub use selftest::LocalConversation;
 
 #[wasm_bindgen(start)]
 pub fn start() {
@@ -26,5 +28,13 @@ pub fn libsignal_version() -> String {
 #[wasm_bindgen(js_name = runProtocolSelftest)]
 pub async fn run_protocol_selftest() -> String {
     let report = selftest::run().await;
+    serde_json::to_string(&report).expect("report serializes")
+}
+
+/// Runs the local provisioning (QR linking) self-test against an independent
+/// test vector (web/testdata/provisioning-vector.json). LOCAL test only.
+#[wasm_bindgen(js_name = runProvisioningSelftest)]
+pub async fn run_provisioning_selftest(vector_json: String) -> String {
+    let report = selftest::run_provisioning(&vector_json).await;
     serde_json::to_string(&report).expect("report serializes")
 }

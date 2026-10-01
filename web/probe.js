@@ -32,8 +32,9 @@ async function probeFetch(url, mode, timeoutMs = 20000) {
   const abort = new AbortController();
   const timer = setTimeout(() => abort.abort(), timeoutMs);
   try {
+    // The Fetch Standard rejects mode "no-cors" unless redirect is "follow".
     const res = await fetch(url, {
-      mode, credentials: 'omit', cache: 'no-store', redirect: 'manual', signal: abort.signal,
+      mode, credentials: 'omit', cache: 'no-store', redirect: mode === 'no-cors' ? 'follow' : 'manual', signal: abort.signal,
     });
     out.ok = true;
     out.type = res.type;

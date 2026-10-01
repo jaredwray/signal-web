@@ -680,3 +680,362 @@ async fn run_inner(report: &mut Report) -> R<()> {
 
     Ok(())
 }
+
+// ---------------------------------------------------------------------------
+// Linked-device provisioning (local). Uses synthetic frames and an
+// independent test vector produced by scripts/make_provisioning_vector.py.
+// ---------------------------------------------------------------------------
+
+use crate::provisioning::{self, ProvisioningError, ProvisioningSession, proto as pproto};
+use base64::Engine as _;
+use prost::Message as _;
+
+#[derive(serde::Deserialize)]
+struct Vector {
+    recipient_private_key_hex: String,
+    recipient_public_key_hex: String,
+    envelope_hex: String,
+    expected: VectorExpected,
+}
+
+#[derive(serde::Deserialize)]
+struct VectorExpected {
+    aci: String,
+    number: String,
+    provisioning_code: String,
+    profile_key_hex: String,
+    account_entropy_pool: String,
+    aci_identity_public_hex: String,
+}
+
+fn server_frame(id: u64, path: &str, body: Vec<u8>) -> Vec<u8> {
+    pproto::WebSocketMessage {
+        r#type: Some(pproto::TYPE_REQUEST),
+        request: Some(pproto::WebSocketRequestMessage {
+            verb: Some("PUT".into()),
+            path: Some(path.into()),
+            body: Some(body),
+            headers: Vec::new(),
+            id: Some(id),
+        }),
+        response: None,
+    }
+    .encode_to_vec()
+}
+
+fn check_ack(ack_b64: &str, id: u64) -> R<()> {
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(ack_b64)
+        .map_err(ctx("ack base64"))?;
+    let msg = pproto::WebSocketMessage::decode(bytes.as_slice()).map_err(ctx("ack decode"))?;
+    let resp = msg.response.ok_or("ack has no response")?;
+    ensure(msg.r#type == Some(pproto::TYPE_RESPONSE), "ack is not a RESPONSE")?;
+    ensure(resp.id == Some(id) && resp.status == Some(200), "ack id/status mismatch")
+}
+
+fn percent_decode(s: &str) -> R<String> {
+    let b = s.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < b.len() {
+        match b[i] {
+            b'%' if i + 2 < b.len() => {
+                out.push(u8::from_str_radix(&s[i + 1..i + 3], 16).map_err(ctx("percent"))?);
+                i += 3;
+            }
+            b'+' => {
+                out.push(b' ');
+                i += 1;
+            }
+            c => {
+                out.push(c);
+                i += 1;
+            }
+        }
+    }
+    String::from_utf8(out).map_err(ctx("utf8"))
+}
+
+fn tamper_envelope(envelope: &[u8], f: impl FnOnce(&mut pproto::ProvisionEnvelope)) -> Vec<u8> {
+    let mut env = pproto::ProvisionEnvelope::decode(envelope).expect("vector envelope decodes");
+    f(&mut env);
+    env.encode_to_vec()
+}
+
+pub async fn run_provisioning(vector_json: &str) -> Report {
+    let mut report = Report {
+        kind: "local-provisioning-selftest",
+        label: "LOCAL provisioning (QR linking) crypto/framing test; synthetic data, not a live Signal test",
+        libsignal_core_version: libsignal_core::VERSION,
+        passed: 0,
+        failed: 0,
+        aborted: None,
+        checks: Vec::new(),
+    };
+    if let Err(err) = run_provisioning_inner(&mut report, vector_json).await {
+        report.aborted = Some(err);
+    }
+    report
+}
+
+async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()> {
+    step!(report, "provisioning.qr_withheld_until_server_address", {
+        let session = ProvisioningSession::new();
+        ensure(session.link_qr_svg().is_none(), "QR produced before the server assigned an address")?;
+        Ok("no QR code is produced before a ProvisioningAddress arrives".into())
+    });
+
+    step!(report, "provisioning.address_frame_link_url_and_ack", {
+        let mut session = ProvisioningSession::new();
+        let address = "Ab+cd/ef==";
+        let frame = server_frame(
+            7,
+            "/v1/address",
+            pproto::ProvisioningAddress { address: Some(address.into()) }.encode_to_vec(),
+        );
+        let provisioning::FrameEvent::Address { link_url, ack_b64 } =
+            session.handle(&frame).map_err(ctx("handle"))?
+        else {
+            return Err("expected an Address event".into());
+        };
+        check_ack(&ack_b64, 7)?;
+        let prefix = "sgnl://linkdevice?uuid=Ab%2Bcd%2Fef%3D%3D&pub_key=";
+        ensure(link_url.starts_with(prefix), format!("unexpected URL {link_url}"))?;
+        ensure(link_url.ends_with("&capabilities=nopni"), "capabilities missing")?;
+        let pub_key = &link_url[prefix.len()..link_url.len() - "&capabilities=nopni".len()];
+        let decoded = base64::engine::general_purpose::STANDARD
+            .decode(percent_decode(pub_key)?)
+            .map_err(ctx("pub_key base64"))?;
+        ensure(decoded == session.public_key().serialize().to_vec(), "pub_key does not round-trip")?;
+        ensure(decoded.len() == 33 && decoded[0] == 0x05, "pub_key not a 33-byte typed Curve25519 key")?;
+        let svg = session.link_qr_svg().ok_or("no QR after address")?;
+        ensure(svg.contains("<svg"), "QR is not SVG")?;
+        Ok(format!("URL format matches Signal-Desktop linkDeviceRoute; QR SVG {} bytes; ack id 7 status 200", svg.len()))
+    });
+
+    step!(report, "provisioning.roundtrip_envelope_frame", {
+        let mut session = ProvisioningSession::new();
+        let message = pproto::ProvisionMessage {
+            aci: Some("00000000-0000-4000-8000-000000000001".into()),
+            provisioning_code: Some("synthetic-code".into()),
+            aci_identity_key_private: Some(vec![1; 32]),
+            aci_identity_key_public: Some(vec![5; 33]),
+            profile_key: Some(vec![2; 32]),
+            provisioning_version: Some(1),
+            ..Default::default()
+        };
+        let envelope = provisioning::encrypt_for_test(&session.public_key(), &message);
+        let event = session
+            .handle(&server_frame(8, "/v1/message", envelope))
+            .map_err(ctx("handle"))?;
+        let provisioning::FrameEvent::Provisioned { summary, ack_b64 } = event else {
+            return Err("expected a Provisioned event".into());
+        };
+        check_ack(&ack_b64, 8)?;
+        ensure(session.provisioned() == Some(&message), "decrypted message differs")?;
+        ensure(summary.has_provisioning_code && summary.has_aci_identity_key_pair, "summary incomplete")?;
+        Ok("envelope frame decrypted, acknowledged, secrets kept in WASM".into())
+    });
+
+    let vector: Vector = serde_json::from_str(vector_json).map_err(ctx("vector json"))?;
+    let hexd = |s: &str| hex::decode(s).map_err(ctx("hex"));
+    let private = PrivateKey::deserialize(&hexd(&vector.recipient_private_key_hex)?).map_err(ctx("private key"))?;
+    let public = private.public_key().map_err(ctx("public key"))?;
+    let envelope = hexd(&vector.envelope_hex)?;
+
+    step!(report, "provisioning.independent_python_vector", {
+        ensure(
+            public.serialize().to_vec() == hexd(&vector.recipient_public_key_hex)?,
+            "recipient public key mismatch",
+        )?;
+        let m = provisioning::decrypt_envelope(&private, &envelope).map_err(ctx("decrypt"))?;
+        let e = &vector.expected;
+        ensure(m.aci.as_deref() == Some(e.aci.as_str()), "aci")?;
+        ensure(m.number.as_deref() == Some(e.number.as_str()), "number")?;
+        ensure(m.provisioning_code.as_deref() == Some(e.provisioning_code.as_str()), "provisioning code")?;
+        ensure(m.profile_key.as_deref() == Some(hexd(&e.profile_key_hex)?.as_slice()), "profile key")?;
+        ensure(m.account_entropy_pool.as_deref() == Some(e.account_entropy_pool.as_str()), "AEP")?;
+        let id_pub = hexd(&e.aci_identity_public_hex)?;
+        ensure(m.aci_identity_key_public.as_deref() == Some(id_pub.as_slice()), "identity public")?;
+        // The shared identity private key must match the shared public key.
+        let id_priv = PrivateKey::deserialize(m.aci_identity_key_private.as_deref().ok_or("no identity private")?)
+            .map_err(ctx("identity private"))?;
+        ensure(id_priv.public_key().map_err(ctx("derive"))?.serialize().to_vec() == id_pub, "identity key pair inconsistent")?;
+        let aci_binary = m.aci_binary.as_deref().ok_or("no aciBinary")?;
+        ensure(hex::encode(aci_binary) == e.aci.replace('-', ""), "aciBinary")?;
+        Ok(format!("{}-byte envelope from a separate Python implementation decrypted; all fields match", envelope.len()))
+    });
+
+    let other = KeyPair::generate(&mut rand::rng());
+    let cases: [(&str, Vec<u8>, &PrivateKey, fn(&ProvisioningError) -> bool); 6] = [
+        ("provisioning.reject_flipped_mac", tamper_envelope(&envelope, |e| {
+            let b = e.body.as_mut().unwrap();
+            let n = b.len();
+            b[n - 1] ^= 1;
+        }), &private, |e| *e == ProvisioningError::BadMac),
+        ("provisioning.reject_flipped_ciphertext", tamper_envelope(&envelope, |e| {
+            e.body.as_mut().unwrap()[20] ^= 1;
+        }), &private, |e| *e == ProvisioningError::BadMac),
+        ("provisioning.reject_unknown_version", tamper_envelope(&envelope, |e| {
+            e.body.as_mut().unwrap()[0] = 2;
+        }), &private, |e| *e == ProvisioningError::BadVersion(2)),
+        ("provisioning.reject_truncated_body", tamper_envelope(&envelope, |e| {
+            e.body.as_mut().unwrap().truncate(40);
+        }), &private, |e| matches!(e, ProvisioningError::Envelope(_))),
+        ("provisioning.reject_substituted_sender_key", tamper_envelope(&envelope, |e| {
+            e.public_key = Some(KeyPair::generate(&mut rand::rng()).public_key.serialize().to_vec());
+        }), &private, |e| *e == ProvisioningError::BadMac),
+        ("provisioning.reject_wrong_recipient", envelope.clone(), &other.private_key, |e| *e == ProvisioningError::BadMac),
+    ];
+    for (name, bytes, key, expected) in cases {
+        step!(report, name, {
+            match provisioning::decrypt_envelope(key, &bytes) {
+                Ok(_) => Err("tampered envelope was ACCEPTED".into()),
+                Err(err) if expected(&err) => Ok(format!("rejected ({err})")),
+                Err(err) => Err(format!("rejected for an unexpected reason: {err}")),
+            }
+        });
+    }
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// LocalConversation: two synthetic parties whose libsignal state can be
+// snapshotted to bytes and restored. Used by web/storage-test.html to persist
+// real ratchet state in encrypted IndexedDB and resume after a browser restart.
+// LOCAL only: both parties live in this page.
+// ---------------------------------------------------------------------------
+
+use futures_util::FutureExt as _;
+use wasm_bindgen::prelude::*;
+
+fn now_or_fail<F: std::future::Future>(f: F) -> F::Output {
+    // libsignal's in-memory stores never actually suspend.
+    f.now_or_never().expect("in-memory store futures complete immediately")
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct SnapshotWire {
+    name: String,
+    device: u32,
+    identity_hex: String,
+    registration_id: u32,
+    peer_name: String,
+    peer_device: u32,
+    peer_identity_hex: String,
+    session_hex: String,
+}
+
+impl SnapshotWire {
+    fn from(s: &Snapshot) -> Self {
+        Self {
+            name: s.address.name().to_owned(),
+            device: u32::from(s.address.device_id()),
+            identity_hex: hex::encode(&s.identity),
+            registration_id: s.registration_id,
+            peer_name: s.peer.name().to_owned(),
+            peer_device: u32::from(s.peer.device_id()),
+            peer_identity_hex: hex::encode(&s.peer_identity),
+            session_hex: hex::encode(&s.session),
+        }
+    }
+
+    fn into_snapshot(self) -> R<Snapshot> {
+        let dev = |d: u32| DeviceId::try_from(d).map_err(|_| "invalid device id".to_string());
+        Ok(Snapshot {
+            address: ProtocolAddress::new(self.name, dev(self.device)?),
+            identity: hex::decode(self.identity_hex).map_err(ctx("hex"))?,
+            registration_id: self.registration_id,
+            peer: ProtocolAddress::new(self.peer_name, dev(self.peer_device)?),
+            peer_identity: hex::decode(self.peer_identity_hex).map_err(ctx("hex"))?,
+            session: hex::decode(self.session_hex).map_err(ctx("hex"))?,
+        })
+    }
+}
+
+#[wasm_bindgen]
+pub struct LocalConversation {
+    alice: Party,
+    bob: Party,
+}
+
+#[wasm_bindgen]
+impl LocalConversation {
+    /// Two fresh synthetic identities with an established PQXDH/SPQR session.
+    pub fn create() -> Result<LocalConversation, JsError> {
+        let mut rng = rand::rng();
+        let mut alice = Party::new(&mut rng, None).map_err(|e| JsError::new(&e))?;
+        let mut bob = Party::new(&mut rng, None).map_err(|e| JsError::new(&e))?;
+        let bundle = now_or_fail(publish_bundle(&mut bob, &mut rng)).map_err(|e| JsError::new(&e))?;
+        let (alice_addr, bob_addr) = (alice.address.clone(), bob.address.clone());
+        now_or_fail(process_prekey_bundle(
+            &bob_addr,
+            &alice_addr,
+            &mut alice.store.session_store,
+            &mut alice.store.identity_store,
+            &bundle,
+            clock::now(),
+            &mut rng,
+        ))
+        .map_err(|e| JsError::new(&e.to_string()))?;
+        let mut conv = LocalConversation { alice, bob };
+        conv.alice_to_bob("hello")?;
+        conv.bob_to_alice("hi")?;
+        Ok(conv)
+    }
+
+    /// Restores both parties from `snapshot()` bytes.
+    #[wasm_bindgen(js_name = fromSnapshot)]
+    pub fn from_snapshot(bytes: &[u8]) -> Result<LocalConversation, JsError> {
+        let (a, b): (SnapshotWire, SnapshotWire) =
+            serde_json::from_slice(bytes).map_err(|e| JsError::new(&format!("snapshot: {e}")))?;
+        let restore_one = |w: SnapshotWire| -> R<Party> { now_or_fail(restore(&w.into_snapshot()?)) };
+        Ok(LocalConversation {
+            alice: restore_one(a).map_err(|e| JsError::new(&e))?,
+            bob: restore_one(b).map_err(|e| JsError::new(&e))?,
+        })
+    }
+
+    /// Serialized identity keys, registration ids and session records.
+    /// Contains private key material: callers must encrypt it before storing.
+    pub fn snapshot(&self) -> Result<Vec<u8>, JsError> {
+        let a = now_or_fail(snapshot(&self.alice, &self.bob.address)).map_err(|e| JsError::new(&e))?;
+        let b = now_or_fail(snapshot(&self.bob, &self.alice.address)).map_err(|e| JsError::new(&e))?;
+        serde_json::to_vec(&(SnapshotWire::from(&a), SnapshotWire::from(&b)))
+            .map_err(|e| JsError::new(&e.to_string()))
+    }
+
+    /// Encrypts as Alice, decrypts as Bob, returns Bob's plaintext.
+    #[wasm_bindgen(js_name = aliceToBob)]
+    pub fn alice_to_bob(&mut self, text: &str) -> Result<String, JsError> {
+        self.send(true, text)
+    }
+
+    #[wasm_bindgen(js_name = bobToAlice)]
+    pub fn bob_to_alice(&mut self, text: &str) -> Result<String, JsError> {
+        self.send(false, text)
+    }
+
+    /// Hex of Alice's current session record, to show the ratchet advancing.
+    #[wasm_bindgen(js_name = aliceSessionDigest)]
+    pub fn alice_session_digest(&self) -> Result<String, JsError> {
+        use sha2::Digest as _;
+        let bytes = now_or_fail(session_bytes(&self.alice, &self.bob.address)).map_err(|e| JsError::new(&e))?;
+        Ok(hex::encode(&sha2::Sha256::digest(&bytes)[..8]))
+    }
+}
+
+impl LocalConversation {
+    fn send(&mut self, alice_sends: bool, text: &str) -> Result<String, JsError> {
+        let mut rng = rand::rng();
+        let (from, to) = if alice_sends {
+            (&mut self.alice, &mut self.bob)
+        } else {
+            (&mut self.bob, &mut self.alice)
+        };
+        let (from_addr, to_addr) = (from.address.clone(), to.address.clone());
+        let wire = now_or_fail(send(from, &to_addr, text.as_bytes(), &mut rng)).map_err(|e| JsError::new(&e))?;
+        let plain = now_or_fail(receive(to, &from_addr, &wire, &mut rng)).map_err(|e| JsError::new(&e))?;
+        String::from_utf8(plain).map_err(|e| JsError::new(&e.to_string()))
+    }
+}

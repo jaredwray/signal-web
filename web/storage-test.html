@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Encrypted storage test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Encrypted IndexedDB persistence: local test</h1>
+    <p class="note">LOCAL functional test with synthetic identities: real libsignal session state
+      is encrypted into IndexedDB, the browser is restarted, and messaging resumes. It does not
+      contact Signal. It does not demonstrate production security.</p>
+    <form id="manual">
+      <label>Test passphrase <input id="pass" type="password" autocomplete="off" required></label>
+      <button type="submit" name="phase" value="setup">Phase 1: set up</button>
+      <button type="submit" name="phase" value="resume">Phase 2: resume (after restarting the browser)</button>
+    </form>
+    <p id="summary" role="status"></p>
+    <table id="results">
+      <thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </main>
+  <script type="module" src="storage-test.js"></script>
+</body>
+</html>

@@ -74,6 +74,18 @@ async function openPlaywright(spec, s, { userDataDir, launchArgs, proxy }) {
         close: () => page.close(),
       };
     },
+    /** Top-level navigation; returns the browser's own error for failures. */
+    async navigate(url, timeoutMs = 30_000) {
+      const page = await context.newPage();
+      try {
+        const res = await page.goto(url, { timeout: timeoutMs });
+        return { ok: true, status: res?.status() ?? null };
+      } catch (err) {
+        return { ok: false, error: String(err.message).split('\n')[0] };
+      } finally {
+        await page.close();
+      }
+    },
     async close() {
       await context.close();
       if (browser && !userDataDir) await browser.close();
@@ -130,6 +142,18 @@ async function openWebDriver(spec, s, { userDataDir }) {
         },
         close: async () => {},
       };
+    },
+    /** Top-level navigation; W3C WebDriver reports TLS certificate
+     *  rejections as the standard error code "insecure certificate". */
+    async navigate(url) {
+      const res = await fetch(`${s.url}/session/${id}/url`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && !json.value?.error) return { ok: true, status: null };
+      return { ok: false, error: `${json.value?.error ?? res.status}: ${String(json.value?.message ?? '').split('\n')[0]}` };
     },
     async close() {
       await wd(s.url, 'DELETE', `/session/${id}`).catch(() => {});
