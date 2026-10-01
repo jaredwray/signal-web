@@ -1,0 +1,489 @@
+{
+  "kind": "live-browser-network-probe",
+  "label": "LIVE network test from an ordinary browser origin; no Signal account or credentials used",
+  "generated_at": "2026-10-01T13:37:41.148Z",
+  "browser_spec": "pw:chromium",
+  "browser": "141.0.7390.37",
+  "origin": "http://localhost:8182 (static files only)",
+  "request_interception": "none",
+  "network_path": "browser default",
+  "verdict": {
+    "control_public_ca_host_reachable": false,
+    "signal_hosts_reachable_no_cors": [],
+    "signal_hosts_unreachable_no_cors": [
+      "https://chat.signal.org/v1/certificate/delivery",
+      "https://grpc.chat.signal.org/",
+      "https://storage.signal.org/v1/storage/manifest",
+      "https://cdn.signal.org/attachments/probe-nonexistent",
+      "https://cdn2.signal.org/attachments/probe-nonexistent",
+      "https://cdn3.signal.org/attachments/probe-nonexistent",
+      "https://cdsi.signal.org/",
+      "https://svr2.signal.org/"
+    ],
+    "cors_readable_responses": [],
+    "websockets_opened": [],
+    "validity": "INVALID_FOR_SIGNAL_CONCLUSIONS",
+    "reason": "the network re-terminated TLS (issuer seen: CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic)"
+  },
+  "page_report": {
+    "kind": "browser-network-probe",
+    "origin": "http://localhost:8182",
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.37 Safari/537.36",
+    "secure_context": true,
+    "at": "2026-10-01T13:37:40.902Z",
+    "results": [
+      {
+        "label": "chat REST",
+        "purpose": "core: sender certificate (auth required)",
+        "kind": "fetch/cors",
+        "url": "https://chat.signal.org/v1/certificate/delivery",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 603
+      },
+      {
+        "label": "chat REST",
+        "purpose": "core: sender certificate (auth required) [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://chat.signal.org/v1/certificate/delivery",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "chat (grpc host)",
+        "purpose": "core: libsignal-net chat host",
+        "kind": "fetch/cors",
+        "url": "https://grpc.chat.signal.org/",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 475
+      },
+      {
+        "label": "chat (grpc host)",
+        "purpose": "core: libsignal-net chat host [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://grpc.chat.signal.org/",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "storage",
+        "purpose": "storage service (auth required)",
+        "kind": "fetch/cors",
+        "url": "https://storage.signal.org/v1/storage/manifest",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 430
+      },
+      {
+        "label": "storage",
+        "purpose": "storage service (auth required) [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://storage.signal.org/v1/storage/manifest",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "cdn0",
+        "purpose": "attachment download path",
+        "kind": "fetch/cors",
+        "url": "https://cdn.signal.org/attachments/probe-nonexistent",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 400
+      },
+      {
+        "label": "cdn0",
+        "purpose": "attachment download path [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://cdn.signal.org/attachments/probe-nonexistent",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "cdn2",
+        "purpose": "attachment download path",
+        "kind": "fetch/cors",
+        "url": "https://cdn2.signal.org/attachments/probe-nonexistent",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 474
+      },
+      {
+        "label": "cdn2",
+        "purpose": "attachment download path [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://cdn2.signal.org/attachments/probe-nonexistent",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "cdn3",
+        "purpose": "attachment download path",
+        "kind": "fetch/cors",
+        "url": "https://cdn3.signal.org/attachments/probe-nonexistent",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 358
+      },
+      {
+        "label": "cdn3",
+        "purpose": "attachment download path [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://cdn3.signal.org/attachments/probe-nonexistent",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "cdsi",
+        "purpose": "contact discovery (enclave)",
+        "kind": "fetch/cors",
+        "url": "https://cdsi.signal.org/",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 427
+      },
+      {
+        "label": "cdsi",
+        "purpose": "contact discovery (enclave) [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://cdsi.signal.org/",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "svr2",
+        "purpose": "secure value recovery (enclave)",
+        "kind": "fetch/cors",
+        "url": "https://svr2.signal.org/",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 455
+      },
+      {
+        "label": "svr2",
+        "purpose": "secure value recovery (enclave) [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://svr2.signal.org/",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "CONTROL updates",
+        "purpose": "control: Signal host with a publicly trusted certificate",
+        "kind": "fetch/cors",
+        "url": "https://updates.signal.org/desktop/latest.yml",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 419
+      },
+      {
+        "label": "CONTROL updates",
+        "purpose": "control: Signal host with a publicly trusted certificate [reachability diagnostic only]",
+        "kind": "fetch/no-cors",
+        "url": "https://updates.signal.org/desktop/latest.yml",
+        "ok": false,
+        "error": "TypeError: Failed to fetch",
+        "ms": 0
+      },
+      {
+        "label": "provisioning (chat)",
+        "purpose": "core: linking",
+        "kind": "websocket",
+        "url": "wss://chat.signal.org/v1/websocket/provisioning/",
+        "events": [
+          "error",
+          "close(code=1006, wasClean=false, reason=\"\")"
+        ],
+        "ms": 520
+      },
+      {
+        "label": "provisioning (grpc host)",
+        "purpose": "core: linking via libsignal-net host",
+        "kind": "websocket",
+        "url": "wss://grpc.chat.signal.org/v1/websocket/provisioning/",
+        "events": [
+          "error",
+          "close(code=1006, wasClean=false, reason=\"\")"
+        ],
+        "ms": 395
+      },
+      {
+        "label": "CONTROL updates",
+        "purpose": "control: publicly trusted certificate, not a WebSocket endpoint",
+        "kind": "websocket",
+        "url": "wss://updates.signal.org/v1/websocket/provisioning/",
+        "events": [
+          "error",
+          "close(code=1006, wasClean=false, reason=\"\")"
+        ],
+        "ms": 384
+      }
+    ],
+    "console": [
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://chat.signal.org/v1/certificate/delivery. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://grpc.chat.signal.org/. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://storage.signal.org/v1/storage/manifest. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://cdn.signal.org/attachments/probe-nonexistent. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://cdn2.signal.org/attachments/probe-nonexistent. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://cdn3.signal.org/attachments/probe-nonexistent. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://cdsi.signal.org/. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://svr2.signal.org/. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "Fetch API cannot load https://updates.signal.org/desktop/latest.yml. Request mode is \"no-cors\" but the redirect mode is not \"follow\"."
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://chat.signal.org/v1/websocket/provisioning/' failed: Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://grpc.chat.signal.org/v1/websocket/provisioning/' failed: Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'wss://updates.signal.org/v1/websocket/provisioning/' failed: Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+      }
+    ]
+  },
+  "devtools_network": [
+    {
+      "id": "7523.6",
+      "url": "https://chat.signal.org/v1/certificate/delivery",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.7",
+      "url": "https://grpc.chat.signal.org/",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.8",
+      "url": "https://storage.signal.org/v1/storage/manifest",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.9",
+      "url": "https://cdn.signal.org/attachments/probe-nonexistent",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.10",
+      "url": "https://cdn2.signal.org/attachments/probe-nonexistent",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.11",
+      "url": "https://cdn3.signal.org/attachments/probe-nonexistent",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.12",
+      "url": "https://cdsi.signal.org/",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.13",
+      "url": "https://svr2.signal.org/",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.14",
+      "url": "https://updates.signal.org/desktop/latest.yml",
+      "type": "Fetch",
+      "error_text": "net::ERR_CERT_AUTHORITY_INVALID",
+      "cors_error": null
+    },
+    {
+      "id": "7523.15",
+      "url": "wss://chat.signal.org/v1/websocket/provisioning/",
+      "type": "WebSocket",
+      "ws_error": "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+    },
+    {
+      "id": "7523.16",
+      "url": "wss://grpc.chat.signal.org/v1/websocket/provisioning/",
+      "type": "WebSocket",
+      "ws_error": "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+    },
+    {
+      "id": "7523.17",
+      "url": "wss://updates.signal.org/v1/websocket/provisioning/",
+      "type": "WebSocket",
+      "ws_error": "Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID"
+    }
+  ],
+  "netlog": {
+    "proxy_resolution": [
+      "DIRECT",
+      "PROXY 127.0.0.1:43847"
+    ],
+    "certificate_chains_received": [
+      {
+        "host": "chat.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:37:40 2026 GMT -> Oct  1 13:37:40 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "CE:AF:78:39:96:23:E8:F4:59:68:9A:81:B9:AB:73:82:AA:F8:AE:F3:BD:83:B1:41:1A:3E:CF:FA:26:C3:D9:C3",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      },
+      {
+        "host": "grpc.chat.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:37:40 2026 GMT -> Oct  1 13:37:40 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "99:F5:6D:8C:F7:58:F3:82:3A:38:4D:36:88:85:8C:EF:3D:1C:47:76:6E:01:9F:30:85:A4:36:73:AA:87:FD:2E",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      },
+      {
+        "host": "storage.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:37:37 2026 GMT -> Oct  1 13:37:37 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "10:29:1A:40:13:23:57:C4:40:FD:3C:FA:0F:47:51:48:BC:BB:2C:93:43:B5:77:6D:96:AC:96:2E:79:0A:47:B3",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      },
+      {
+        "host": "cdn.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:28:00 2026 GMT -> Oct  1 13:28:00 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "4A:89:6B:89:F1:99:96:50:7E:D8:5D:FC:53:65:17:B3:9A:94:5D:04:C0:B0:8C:72:87:04:3A:43:48:2C:01:87",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      },
+      {
+        "host": "cdn2.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:37:37 2026 GMT -> Oct  1 13:37:37 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "44:A7:AF:EE:0F:B6:B3:BB:79:8A:AF:D8:F1:84:E0:E0:E0:BD:4D:2D:5C:8A:F1:3B:E0:9D:67:DE:12:06:07:78",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      },
+      {
+        "host": "cdn3.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:37:38 2026 GMT -> Oct  1 13:37:38 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "29:20:16:B1:80:61:F4:3C:D6:A2:7C:31:C1:2A:C2:0E:58:89:68:53:16:48:E6:C4:9D:15:4C:CA:2B:63:CD:2B",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      },
+      {
+        "host": "cdsi.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:37:38 2026 GMT -> Oct  1 13:37:38 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "B2:55:B0:1F:33:97:C1:CD:FE:2B:67:18:24:28:A1:0C:59:C2:B5:B1:53:42:D6:E0:0B:83:1A:7D:02:FD:BC:82",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      },
+      {
+        "host": "svr2.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:37:39 2026 GMT -> Oct  1 13:37:39 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "D8:FF:84:FD:39:BF:F8:25:17:2D:52:FF:0B:BA:C6:00:F6:E9:A6:EF:FD:FC:63:C6:4F:CD:F0:E4:A2:91:95:42",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      },
+      {
+        "host": "updates.signal.org",
+        "leaf_issuer": "CN=CCR agent-proxy interception CA (production) 2026-08, O=Anthropic",
+        "leaf_valid": "Oct  1 12:37:40 2026 GMT -> Oct  1 13:37:40 2027 GMT",
+        "chain_length": 2,
+        "chain_sha256": [
+          "2F:89:B2:CB:25:A4:0C:06:AE:55:E3:55:FB:4C:20:85:AA:C6:B0:C4:E0:C7:D9:36:66:15:B3:73:2E:42:4C:8F",
+          "EB:F2:2B:4E:9F:96:DA:5E:BA:D8:FB:66:52:72:25:CB:FE:A5:8A:F5:FF:77:6E:98:D3:E8:CE:67:3B:67:84:39"
+        ],
+        "includes_signal_root": false
+      }
+    ]
+  },
+  "static_origin_requests": [
+    {
+      "method": "GET",
+      "path": "/probe.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.js",
+      "status": 200
+    }
+  ]
+}

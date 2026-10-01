@@ -1,0 +1,37 @@
+[package]
+name = "signal-web-core"
+version = "0.0.1"
+description = "Feasibility spike: libsignal-protocol compiled for the browser (wasm32-unknown-unknown)"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+libsignal-protocol = { workspace = true }
+libsignal-core = { workspace = true }
+
+# Versions chosen to match what libsignal-protocol already pulls in, so the
+# build does not carry two copies of rand/getrandom.
+rand = "0.9.4"
+# Both getrandom generations are in libsignal's tree (rand 0.9 -> 0.3,
+# RustCrypto crypto-common 0.2 -> 0.4); each needs its browser backend enabled.
+getrandom = { version = "0.3", features = ["wasm_js"] }
+getrandom04 = { package = "getrandom", version = "0.4", features = ["wasm_js"] }
+
+signal-crypto = { workspace = true }
+hkdf = "0.13"
+hmac = "0.13"
+sha2 = "0.11"
+prost = "0.14"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hex = "0.4"
+
+wasm-bindgen = "=0.2.129"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+console_error_panic_hook = "0.1"

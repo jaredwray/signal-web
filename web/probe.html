@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Signal browser network probe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Direct browser networking probe</h1>
+    <p class="note">Contacts Signal's public service hosts directly from this page's origin, without
+      credentials, one attempt per target. It records only what page JavaScript can observe
+      (status, headers it may read, WebSocket events). It never prints message contents.
+      Browser-internal reasons (for example certificate errors) appear in the developer console.</p>
+    <p><button id="run">Run probe</button> <span id="summary" role="status"></span></p>
+    <table id="results">
+      <thead><tr><th>Target</th><th>Kind</th><th>Outcome visible to page JS</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <details><summary>Raw JSON</summary><pre id="raw"></pre></details>
+  </main>
+  <script type="module" src="probe.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+[net]
+# Fetch the pinned libsignal / SPQR git dependencies with the git CLI so the
+# environment's normal git configuration (proxy, CA bundle) applies.
+git-fetch-with-cli = true
+
+[target.wasm32-unknown-unknown]
+# getrandom 0.3 needs an explicit opt-in to use the browser's
+# crypto.getRandomValues() on wasm32-unknown-unknown.
+rustflags = ['--cfg', 'getrandom_backend="wasm_js"']

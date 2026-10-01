@@ -1,0 +1,20 @@
+{
+  "name": "signal-web",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Feasibility spike: can a Signal client run entirely in a normal web browser (Rust/WASM, static hosting, no backend)?",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build:wasm": "bash scripts/build-wasm.sh",
+    "serve": "node tools/static-server.mjs --root web --port 8080",
+    "test": "node tools/run-local-tests.mjs",
+    "probe:live": "node tools/run-probe.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

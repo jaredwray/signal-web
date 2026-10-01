@@ -1,0 +1,276 @@
+{
+  "kind": "upstream-libsignal-protocol-tests-in-browser",
+  "label": "LOCAL tests from libsignal rust/protocol/tests; not a live Signal test",
+  "libsignal_rev": "e8cc2dddd578859b4a029c9c94670b24ce2b616a",
+  "transforms": "scripts/wasmify_upstream_tests.py (#[test] attribute + SystemTime::now() shim only)",
+  "generated_at": "2026-10-01T13:40:02.075Z",
+  "browser_spec": "pw:chromium",
+  "browser": "141.0.7390.37",
+  "request_interception": "none",
+  "include_ignored": true,
+  "counts": {
+    "ok": 55
+  },
+  "results": [
+    {
+      "binary": "groups",
+      "wasm": "groups-268a20a4e92458d4.wasm",
+      "browser": "141.0.7390.37",
+      "seconds": 3.345,
+      "summary": "test result: ok. 12 passed; 0 failed; 0 ignored; 0 filtered out; finished in 3.15s",
+      "tests": [
+        {
+          "name": "group_sealed_sender_multiple_devices_and_excluded_recipients",
+          "status": "ok"
+        },
+        {
+          "name": "group_sealed_sender_multiple_devices",
+          "status": "ok"
+        },
+        {
+          "name": "group_sealed_sender",
+          "status": "ok"
+        },
+        {
+          "name": "group_out_of_order",
+          "status": "ok"
+        },
+        {
+          "name": "group_no_send_session",
+          "status": "ok"
+        },
+        {
+          "name": "group_no_recv_session",
+          "status": "ok"
+        },
+        {
+          "name": "group_message_key_limit",
+          "status": "ok"
+        },
+        {
+          "name": "group_late_join",
+          "status": "ok"
+        },
+        {
+          "name": "group_large_messages",
+          "status": "ok"
+        },
+        {
+          "name": "group_basic_ratchet",
+          "status": "ok"
+        },
+        {
+          "name": "group_basic_encrypt_decrypt",
+          "status": "ok"
+        },
+        {
+          "name": "group_too_far_in_the_future",
+          "status": "ok"
+        }
+      ],
+      "output": "Loading Wasm module...\n\nrunning 12 tests\ntest group_sealed_sender_multiple_devices_and_excluded_recipients ... ok\ntest group_sealed_sender_multiple_devices ... ok\ntest group_sealed_sender ... ok\ntest group_out_of_order ... ok\ntest group_no_send_session ... ok\ntest group_no_recv_session ... ok\ntest group_message_key_limit ... ok\ntest group_late_join ... ok\ntest group_large_messages ... ok\ntest group_basic_ratchet ... ok\ntest group_basic_encrypt_decrypt ... ok\ntest group_too_far_in_the_future ... ok\n\ntest result: ok. 12 passed; 0 failed; 0 ignored; 0 filtered out; finished in 3.15s\n\n"
+    },
+    {
+      "binary": "sealed_sender",
+      "wasm": "sealed_sender-343e991e9513997f.wasm",
+      "browser": "141.0.7390.37",
+      "seconds": 0.852,
+      "summary": "test result: ok. 11 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.66s",
+      "tests": [
+        {
+          "name": "test_server_cert",
+          "status": "ok"
+        },
+        {
+          "name": "test_sender_key_in_sealed_sender",
+          "status": "ok"
+        },
+        {
+          "name": "test_sender_cert",
+          "status": "ok"
+        },
+        {
+          "name": "test_sealed_sender_multi_recipient_redundant_empty_devices",
+          "status": "ok"
+        },
+        {
+          "name": "test_sealed_sender_multi_recipient_encrypt_with_bad_registration_id",
+          "status": "ok"
+        },
+        {
+          "name": "test_sealed_sender_multi_recipient_encrypt_with_archived_session",
+          "status": "ok"
+        },
+        {
+          "name": "test_sealed_sender_multi_recipient",
+          "status": "ok"
+        },
+        {
+          "name": "test_sealed_sender",
+          "status": "ok"
+        },
+        {
+          "name": "test_revoked_server_cert",
+          "status": "ok"
+        },
+        {
+          "name": "test_decryption_error_in_sealed_sender",
+          "status": "ok"
+        },
+        {
+          "name": "parse_empty_multi_recipient_sealed_sender",
+          "status": "ok"
+        }
+      ],
+      "output": "Loading Wasm module...\n\nrunning 11 tests\ntest test_server_cert ... ok\ntest test_sender_key_in_sealed_sender ... ok\ntest test_sender_cert ... ok\ntest test_sealed_sender_multi_recipient_redundant_empty_devices ... ok\ntest test_sealed_sender_multi_recipient_encrypt_with_bad_registration_id ... ok\ntest test_sealed_sender_multi_recipient_encrypt_with_archived_session ... ok\ntest test_sealed_sender_multi_recipient ... ok\ntest test_sealed_sender ... ok\ntest test_revoked_server_cert ... ok\ntest test_decryption_error_in_sealed_sender ... ok\ntest parse_empty_multi_recipient_sealed_sender ... ok\n\ntest result: ok. 11 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.66s\n\n"
+    },
+    {
+      "binary": "ratchet",
+      "wasm": "ratchet-a905bc348a965c00.wasm",
+      "browser": "141.0.7390.37",
+      "seconds": 0.197,
+      "summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.02s",
+      "tests": [
+        {
+          "name": "test_bob_rejects_torsioned_basekey",
+          "status": "ok"
+        },
+        {
+          "name": "test_bob_rejects_highbit_basekey",
+          "status": "ok"
+        },
+        {
+          "name": "test_alice_and_bob_agree_on_chain_keys_with_kyber",
+          "status": "ok"
+        }
+      ],
+      "output": "Loading Wasm module...\n\nrunning 3 tests\ntest test_bob_rejects_torsioned_basekey ... ok\ntest test_bob_rejects_highbit_basekey ... ok\ntest test_alice_and_bob_agree_on_chain_keys_with_kyber ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.02s\n\n"
+    },
+    {
+      "binary": "session",
+      "wasm": "session-16bcdebf8f38949c.wasm",
+      "browser": "141.0.7390.37",
+      "seconds": 6.47,
+      "summary": "test result: ok. 29 passed; 0 failed; 0 ignored; 0 filtered out; finished in 6.25s",
+      "tests": [
+        {
+          "name": "x3dh_prekey_rejected_as_invalid_message_specifically",
+          "status": "ok"
+        },
+        {
+          "name": "x3dh_established_session_is_or_is_not_usable",
+          "status": "ok"
+        },
+        {
+          "name": "test_zero_is_a_valid_prekey_id",
+          "status": "ok"
+        },
+        {
+          "name": "test_unacknowledged_sessions_eventually_expire",
+          "status": "ok"
+        },
+        {
+          "name": "test_simultaneous_initiate_with_lossage",
+          "status": "ok"
+        },
+        {
+          "name": "test_simultaneous_initiate_repeated_messages",
+          "status": "ok"
+        },
+        {
+          "name": "test_simultaneous_initiate_lost_message_repeated_messages",
+          "status": "ok"
+        },
+        {
+          "name": "test_simultaneous_initiate_lost_message",
+          "status": "ok"
+        },
+        {
+          "name": "test_signedprekey_not_saved",
+          "status": "ok"
+        },
+        {
+          "name": "test_repeat_bundle_message",
+          "status": "ok"
+        },
+        {
+          "name": "test_pqr_state_and_message_contents_nonempty",
+          "status": "ok"
+        },
+        {
+          "name": "test_optional_one_time_prekey",
+          "status": "ok"
+        },
+        {
+          "name": "test_message_key_limits",
+          "status": "ok"
+        },
+        {
+          "name": "test_longer_sessions",
+          "status": "ok"
+        },
+        {
+          "name": "test_duplicate_message_error_returned",
+          "status": "ok"
+        },
+        {
+          "name": "test_basic_simultaneous_initiate",
+          "status": "ok"
+        },
+        {
+          "name": "test_basic_session",
+          "status": "ok"
+        },
+        {
+          "name": "test_basic_prekey",
+          "status": "ok"
+        },
+        {
+          "name": "test_bad_signed_pre_key_signature",
+          "status": "ok"
+        },
+        {
+          "name": "test_bad_message_bundle",
+          "status": "ok"
+        },
+        {
+          "name": "proptest_session_resets",
+          "status": "ok"
+        },
+        {
+          "name": "prekey_message_to_archived_session",
+          "status": "ok"
+        },
+        {
+          "name": "prekey_message_sent_from_different_user_is_rejected",
+          "status": "ok"
+        },
+        {
+          "name": "prekey_message_rejects_wrong_local_recipient_address",
+          "status": "ok"
+        },
+        {
+          "name": "prekey_message_must_not_have_changed_identity_key",
+          "status": "ok"
+        },
+        {
+          "name": "prekey_message_failed_decryption_does_not_update_stores_even_when_previously_archived",
+          "status": "ok"
+        },
+        {
+          "name": "prekey_message_failed_decryption_does_not_update_stores",
+          "status": "ok"
+        },
+        {
+          "name": "test_chain_jump_over_limit_with_self",
+          "status": "ok"
+        },
+        {
+          "name": "test_chain_jump_over_limit",
+          "status": "ok"
+        }
+      ],
+      "output": "Loading Wasm module...\n\nrunning 29 tests\ntest x3dh_prekey_rejected_as_invalid_message_specifically ... ok\ntest x3dh_established_session_is_or_is_not_usable ... ok\ntest test_zero_is_a_valid_prekey_id ... ok\ntest test_unacknowledged_sessions_eventually_expire ... ok\ntest test_simultaneous_initiate_with_lossage ... ok\ntest test_simultaneous_initiate_repeated_messages ... ok\ntest test_simultaneous_initiate_lost_message_repeated_messages ... ok\ntest test_simultaneous_initiate_lost_message ... ok\ntest test_signedprekey_not_saved ... ok\ntest test_repeat_bundle_message ... ok\ntest test_pqr_state_and_message_contents_nonempty ... ok\ntest test_optional_one_time_prekey ... ok\ntest test_message_key_limits ... ok\ntest test_longer_sessions ... ok\ntest test_duplicate_message_error_returned ... ok\ntest test_basic_simultaneous_initiate ... ok\ntest test_basic_session ... ok\ntest test_basic_prekey ... ok\ntest test_bad_signed_pre_key_signature ... ok\ntest test_bad_message_bundle ... ok\ntest proptest_session_resets ... ok\ntest prekey_message_to_archived_session ... ok\ntest prekey_message_sent_from_different_user_is_rejected ... ok\ntest prekey_message_rejects_wrong_local_recipient_address ... ok\ntest prekey_message_must_not_have_changed_identity_key ... ok\ntest prekey_message_failed_decryption_does_not_update_stores_even_when_previously_archived ... ok\ntest prekey_message_failed_decryption_does_not_update_stores ... ok\ntest test_chain_jump_over_limit_with_self ... ok\ntest test_chain_jump_over_limit ... ok\n\ntest result: ok. 29 passed; 0 failed; 0 ignored; 0 filtered out; finished in 6.25s\n\n"
+    }
+  ]
+}

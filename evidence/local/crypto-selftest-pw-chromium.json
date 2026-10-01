@@ -1,0 +1,150 @@
+{
+  "generated_at": "2026-10-01T13:39:34.193Z",
+  "origin": "http://localhost:8181",
+  "request_interception": "none (pages are only observed)",
+  "wasm_bytes": 1082535,
+  "browser": "141.0.7390.37",
+  "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.37 Safari/537.36",
+  "kind": "local-crypto-selftest",
+  "label": "LOCAL cryptographic test with synthetic identities; not a live Signal test",
+  "libsignal_core_version": "0.103.1",
+  "passed": 22,
+  "failed": 0,
+  "aborted": null,
+  "checks": [
+    {
+      "name": "keygen.identity_sign_verify",
+      "ok": true,
+      "detail": "identity public key 33 bytes, signature 64 bytes",
+      "ms": 3
+    },
+    {
+      "name": "keygen.kyber1024_encapsulate",
+      "ok": true,
+      "detail": "public key 1569 bytes, ciphertext 1569 bytes, shared secret 32 bytes",
+      "ms": 10.600000000093132
+    },
+    {
+      "name": "pqxdh.publish_bundle_with_kyber",
+      "ok": true,
+      "detail": "signed prekey + one-time prekey + Kyber1024 prekey",
+      "ms": 4
+    },
+    {
+      "name": "pqxdh.process_prekey_bundle",
+      "ok": true,
+      "detail": "Alice built an outgoing session from Bob's bundle",
+      "ms": 6.100000000093132
+    },
+    {
+      "name": "session.first_message_is_prekey_message",
+      "ok": true,
+      "detail": "PreKeySignalMessage decrypted by Bob",
+      "ms": 15.899999999906868
+    },
+    {
+      "name": "session.reply_is_signal_message",
+      "ok": true,
+      "detail": "SignalMessage decrypted by Alice",
+      "ms": 1.3000000000465661
+    },
+    {
+      "name": "session.pqxdh_and_spqr_in_use",
+      "ok": true,
+      "detail": "both sessions: version 4, EstablishedWithPqxdh + Spqr",
+      "ms": 0.09999999986030161
+    },
+    {
+      "name": "session.evolution_40_messages",
+      "ok": true,
+      "detail": "40 alternating messages; session record 4296 -> 5680 bytes",
+      "ms": 30.5
+    },
+    {
+      "name": "session.out_of_order_delivery",
+      "ok": true,
+      "detail": "6 messages decrypted in order [3,0,5,1,4,2]",
+      "ms": 3.5
+    },
+    {
+      "name": "persistence.serialize_and_restore_sessions",
+      "ok": true,
+      "detail": "rebuilt both stores from 12482 serialized bytes; 10 more messages OK",
+      "ms": 6.900000000139698
+    },
+    {
+      "name": "reject.flipped_mac_bit",
+      "ok": true,
+      "detail": "rejected at decrypt (decrypt: invalid Whisper message: decryption failed)",
+      "ms": 1.1000000000931323
+    },
+    {
+      "name": "reject.flipped_body_bit",
+      "ok": true,
+      "detail": "rejected at decrypt (decrypt: invalid Whisper message: decryption failed)",
+      "ms": 0.6999999999534339
+    },
+    {
+      "name": "reject.truncated",
+      "ok": true,
+      "detail": "rejected at parse (parse SignalMessage: protobuf encoding was invalid)",
+      "ms": 0.19999999995343387
+    },
+    {
+      "name": "reject.unknown_version",
+      "ok": true,
+      "detail": "rejected at parse (parse SignalMessage: ciphertext version was too old <2>)",
+      "ms": 0
+    },
+    {
+      "name": "accept.original_after_rejections",
+      "ok": true,
+      "detail": "session state intact after rejected messages",
+      "ms": 0.5
+    },
+    {
+      "name": "reject.replayed_message",
+      "ok": true,
+      "detail": "replay rejected (decrypt: message with old counter 1 / 0)",
+      "ms": 0
+    },
+    {
+      "name": "reject.tampered_prekey_message",
+      "ok": true,
+      "detail": "rejected at decrypt (decrypt: invalid PreKey message: decryption failed); untampered original then accepted",
+      "ms": 11.399999999906868
+    },
+    {
+      "name": "sealed_sender.roundtrip",
+      "ok": true,
+      "detail": "466 byte envelope; sender certificate verified",
+      "ms": 4.7999999998137355
+    },
+    {
+      "name": "sealed_sender.reject_untrusted_root",
+      "ok": true,
+      "detail": "rejected (sealed_sender_decrypt: invalid sealed sender message: trust root validation failed); same envelope accepted with the correct root",
+      "ms": 2.4000000001396984
+    },
+    {
+      "name": "sealed_sender.reject_expired_certificate",
+      "ok": true,
+      "detail": "rejected (sealed_sender_decrypt: invalid sealed sender message: trust root validation failed)",
+      "ms": 1.3999999999068677
+    },
+    {
+      "name": "sealed_sender.reject_tampered_envelope",
+      "ok": true,
+      "detail": "rejected (sealed_sender_decrypt: invalid sealed sender message: failed to decrypt sealed sender v1 message contents)",
+      "ms": 0.8000000000465661
+    },
+    {
+      "name": "identity.reject_changed_identity_key",
+      "ok": true,
+      "detail": "UntrustedIdentity raised for a changed identity key",
+      "ms": 1.6999999999534339
+    }
+  ],
+  "wasm_instantiate_ms": 19.5999999998603,
+  "console": []
+}

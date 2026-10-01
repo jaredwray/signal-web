@@ -1,0 +1,140 @@
+#!/usr/bin/env node
+// Local tests that need NO Signal account and NO network access to Signal:
+//   1. libsignal-protocol self-test inside browser WASM (web/selftest.html)
+//   2. encrypted IndexedDB persistence across a full browser restart
+//      (web/storage-test.html), when the browser can keep a profile directory
+//
+//   node tools/run-local-tests.mjs [--browser <spec>]...   (default: pw:chromium)
+//
+// Browser specs are documented in tools/browsers.mjs. The runner only observes
+// pages; it registers no request interception. Results: evidence/local/*.json.
+
+import { spawn } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { browserArgs, openBrowser, specSlug } from './browsers.mjs';
+
+const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
+const outDir = join(repo, 'evidence', 'local');
+
+export async function startServer(port, logFile) {
+  if (logFile) rmSync(logFile, { force: true });
+  const proc = spawn(
+    process.execPath,
+    [join(repo, 'tools/static-server.mjs'), '--root', join(repo, 'web'), '--port', String(port),
+      ...(logFile ? ['--log', logFile] : [])],
+    { stdio: ['ignore', 'pipe', 'inherit'] },
+  );
+  await new Promise((resolve, reject) => {
+    proc.stdout.on('data', (d) => d.toString().includes('serving') && resolve());
+    proc.on('exit', (code) => reject(new Error(`static server exited ${code}`)));
+  });
+  return proc;
+}
+
+export function readServerLog(logFile) {
+  if (!existsSync(logFile)) return [];
+  return readFileSync(logFile, 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
+}
+
+function print(title, result) {
+  console.log(`${title}: ${result.passed} passed, ${result.failed} failed` +
+    (result.aborted ? ` (aborted: ${result.aborted})` : '') + (result.crashed ? ` (crashed: ${result.crashed})` : ''));
+  for (const c of result.checks ?? []) {
+    console.log(`  ${c.ok ? 'PASS' : 'FAIL'} ${c.name}${c.ms !== undefined ? ` (${c.ms.toFixed(1)} ms)` : ''} ${c.ok ? '' : c.detail}`);
+  }
+}
+
+async function runOnce(spec, url, globalName, opts = {}) {
+  const browser = await openBrowser(spec, opts);
+  try {
+    const page = await browser.open(url);
+    await page.waitFor(`window.${globalName} !== undefined`, 300_000);
+    const result = await page.evaluate(`window.${globalName}`);
+    const userAgent = await page.evaluate('navigator.userAgent');
+    return { result, console: page.console, version: browser.version, userAgent };
+  } finally {
+    await browser.close();
+  }
+}
+
+async function selftest(spec, origin, meta) {
+  const r = await runOnce(spec, `${origin}/selftest.html`, '__selftest');
+  const evidence = { ...meta, browser: r.version, user_agent: r.userAgent, ...r.result, console: r.console };
+  writeFileSync(join(outDir, `crypto-selftest-${specSlug(spec)}.json`), JSON.stringify(evidence, null, 2) + '\n');
+  print(`[${spec}] crypto self-test`, r.result);
+  return r.result.failed + (r.result.crashed ? 1 : 0);
+}
+
+async function storage(spec, origin, meta) {
+  if (!existsSync(join(repo, 'web/storage-test.html'))) return 0;
+  // Two separate browser processes sharing one profile directory: phase 1
+  // writes encrypted state, the browser is shut down completely, and phase 2
+  // starts a fresh browser that must unlock and resume from disk.
+  const supportsProfile = !spec.startsWith('wd:safari');
+  const profile = supportsProfile ? mkdtempSync(join(tmpdir(), 'signal-web-profile-')) : undefined;
+  const passphrase = `test-only-${Math.random().toString(36).slice(2)}`;
+  const q = `pass=${encodeURIComponent(passphrase)}`;
+  try {
+    const p1 = await runOnce(spec, `${origin}/storage-test.html?phase=setup&${q}`, '__storagetest', { userDataDir: profile });
+    let p2;
+    if (supportsProfile) {
+      p2 = await runOnce(spec, `${origin}/storage-test.html?phase=resume&${q}`, '__storagetest', { userDataDir: profile });
+    } else {
+      p2 = { result: { passed: 0, failed: 0, checks: [], skipped: 'browser restart with a persistent profile is not available through this driver' } };
+    }
+    const evidence = {
+      ...meta,
+      browser: p1.version,
+      user_agent: p1.userAgent,
+      restart: supportsProfile ? 'separate browser processes sharing one profile directory' : 'not tested',
+      phase_setup: p1.result,
+      phase_resume_after_restart: p2.result,
+      console: [...(p1.console ?? []), ...(p2.console ?? [])],
+    };
+    writeFileSync(join(outDir, `storage-test-${specSlug(spec)}.json`), JSON.stringify(evidence, null, 2) + '\n');
+    print(`[${spec}] storage phase 1 (setup)`, p1.result);
+    print(`[${spec}] storage phase 2 (after browser restart)`, p2.result);
+    return p1.result.failed + p2.result.failed + (p1.result.crashed ? 1 : 0) + (p2.result.crashed ? 1 : 0);
+  } finally {
+    if (profile) rmSync(profile, { recursive: true, force: true });
+  }
+}
+
+async function main() {
+  mkdirSync(outDir, { recursive: true });
+  const specs = browserArgs(process.argv, ['pw:chromium']);
+  const port = Number(process.env.STATIC_PORT ?? 8181);
+  const logFile = join(tmpdir(), `signal-web-local-${port}.jsonl`);
+  const server = await startServer(port, logFile);
+  const origin = `http://localhost:${port}`;
+  const meta = {
+    generated_at: new Date().toISOString(),
+    origin,
+    request_interception: 'none (pages are only observed)',
+    wasm_bytes: readFileSync(join(repo, 'web/pkg/signal_web_core_bg.wasm')).length,
+  };
+  let failed = 0;
+  try {
+    for (const spec of specs) {
+      failed += await selftest(spec, origin, meta);
+      failed += await storage(spec, origin, meta);
+    }
+  } finally {
+    server.kill();
+  }
+  const requests = readServerLog(logFile);
+  const nonGet = requests.filter((r) => r.method !== 'GET' && r.method !== 'HEAD');
+  console.log(`static origin served ${requests.length} requests; non-GET/HEAD: ${nonGet.length}`);
+  if (nonGet.length) failed += 1;
+  process.exit(failed ? 1 : 0);
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
