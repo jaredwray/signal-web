@@ -14,7 +14,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { browserArgs, openBrowser, specSlug } from './browsers.mjs';
+import { browserArgs, openBrowser, specSlug, toolVersions } from './browsers.mjs';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
 // CI points EVIDENCE_OUT at a fresh per-job directory so only this run's
@@ -168,6 +168,7 @@ async function main() {
     ci_run: ciRun,
     origin,
     request_interception: 'none (pages are only observed)',
+    tools: toolVersions(),
     wasm_bytes: readFileSync(join(repo, 'web/pkg/signal_web_core_bg.wasm')).length,
   };
   let failed = 0;

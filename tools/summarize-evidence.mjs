@@ -91,7 +91,7 @@ for (const { f, d } of probes) {
   const tls = SIGNAL.filter((h) => hosts[h]?.tls_handshake_failed_unspecified).length;
   out.push(row([LABEL[spec] ?? spec, d.browser, ctl, `${cors}/${corsTotal}`, `${nc}/${SIGNAL.length}`, ws,
     `${rejected}/${SIGNAL.length}${tls ? ` (+ WebSocket close 1015 on ${tls})` : ''}`,
-    [...navErr, ...dt].join('; ') || '-', d.verdict.validity]));
+    [...new Set([...navErr, ...dt])].join('; ') || '-', d.verdict.validity]));
 }
 
 // --- G2 NetLog: the certificate chains Chromium-family browsers received.
@@ -102,8 +102,24 @@ for (const { f, d } of probes.filter((x) => x.d.netlog)) {
     SIGNAL.some((h) => (c.names ?? [c.host]).some((n) => n === h || (n.startsWith('*.') && h.endsWith(n.slice(1))))));
   const short = (c) => (c.names?.[0] ?? c.host).replace('.signal.org', '');
   const issuers = [...new Set(chains.map((c) => (c.leaf_issuer.match(/CN=([^,]+)/) ?? [])[1] ?? c.leaf_issuer))];
-  const withRoot = chains.filter((c) => c.includes_signal_root).map(short);
-  out.push(row([LABEL[spec] ?? spec, chains.map(short).join(', ') || 'none', issuers.join('; ') || '-',
+  const withRoot = [...new Set(chains.filter((c) => c.includes_signal_root).map(short))];
+  out.push(row([LABEL[spec] ?? spec, [...new Set(chains.map(short))].join(', ') || 'none', issuers.join('; ') || '-',
     withRoot.length ? withRoot.join(', ') : 'none', d.verdict.interception_check ?? '-']));
+}
+// --- G3: the real app's linking attempt on the same clean network.
+out.push('', '#### G3 app table', '', row(['Browser', 'WASM loaded', 'QR shown', 'Status shown to the user']), row(Array(4).fill('---')));
+for (const { f, d } of probes) {
+  const spec = specOf(f);
+  const a = d.app_link_attempt ?? {};
+  const wasm = (d.static_origin_requests ?? []).some((r) => r.path.endsWith('.wasm') && r.status === 200);
+  const text = (a.status_text ?? a.error ?? '-').replace(/\|/g, '/');
+  out.push(row([LABEL[spec] ?? spec, wasm ? 'yes' : 'no', String(a.qr_shown ?? false), text.length > 140 ? `${text.slice(0, 140)}…` : text]));
+}
+
+// --- Versions of everything around the browsers.
+out.push('', '#### Versions table', '', row(['Evidence', 'Browser', 'Node', 'Playwright', 'Runner image', 'OS']), row(Array(6).fill('---')));
+for (const { f, d } of [...local, ...live].filter((x) => x.d.tools && !x.f.includes('cloud-container')).sort((a, b) => a.f.localeCompare(b.f))) {
+  const t = d.tools;
+  out.push(row([f.replace(/\.json$/, ''), d.browser ?? '-', t.node, t.playwright, t.runner_image ?? '-', t.os]));
 }
 console.log(out.join('\n'));

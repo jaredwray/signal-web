@@ -10,6 +10,8 @@
 // Runners only observe pages. Nothing here intercepts, rewrites or fulfills
 // network requests, and no browser security setting is changed.
 
+import { createRequire } from 'node:module';
+import { platform, release } from 'node:os';
 import { chromium, firefox, webkit } from 'playwright';
 
 const ENGINES = { chromium, firefox, webkit };
@@ -195,6 +197,17 @@ async function openWebDriver(spec, s, { userDataDir }) {
     async close() {
       await wd(s.url, 'DELETE', `/session/${id}`).catch(() => {});
     },
+  };
+}
+
+/** Versions of the tooling around the browser, recorded with every result. */
+export function toolVersions() {
+  return {
+    node: process.version,
+    playwright: createRequire(import.meta.url)('playwright/package.json').version,
+    os: `${platform()} ${release()}`,
+    // Set on GitHub-hosted runners (e.g. "ubuntu24 20260921.1").
+    runner_image: process.env.ImageOS ? `${process.env.ImageOS} ${process.env.ImageVersion ?? '?'}` : null,
   };
 }
 

@@ -15,7 +15,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { browserArgs, openBrowser, specSlug } from './browsers.mjs';
+import { browserArgs, openBrowser, specSlug, toolVersions } from './browsers.mjs';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
 // CI points EVIDENCE_OUT at a fresh per-job directory so only this run's
@@ -98,6 +98,7 @@ async function main() {
       ci_run: ciRun,
       browser_spec: spec,
       browser: results[0]?.browser,
+      tools: toolVersions(),
       request_interception: 'none',
       include_ignored: includeIgnored,
       counts,

@@ -21,7 +21,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { browserArgs, openBrowser, parseSpec, specSlug } from './browsers.mjs';
+import { browserArgs, openBrowser, parseSpec, specSlug, toolVersions } from './browsers.mjs';
 import { NAV_HOSTS, navUrl, summarizeNetLog, verdict } from './probe-verdict.mjs';
 import { readServerLog, startServer } from './run-local-tests.mjs';
 
@@ -120,6 +120,7 @@ async function probeOne(spec, origin, serverLog) {
     ci_run: ciRun,
     browser_spec: spec,
     browser: browser.version,
+    tools: toolVersions(),
     origin: `${origin} (static files only)`,
     request_interception: 'none',
     network_path: proxyServer ? 'explicit HTTPS CONNECT proxy from environment' : 'browser default',
