@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T14:10:51.390Z",
+  "generated_at": "2026-10-01T14:13:11.318Z",
   "origin": "http://localhost:8181",
   "request_interception": "none (pages are only observed)",
   "wasm_bytes": 1334830,
@@ -34,7 +34,7 @@
       {
         "name": "vault.atomic_commit_and_read_back",
         "ok": true,
-        "detail": "20772-byte libsignal state snapshot committed with its expectation record in one transaction"
+        "detail": "20771-byte libsignal state snapshot committed with its expectation record in one transaction"
       },
       {
         "name": "vault.stored_bytes_are_ciphertext",
@@ -48,9 +48,9 @@
       }
     ],
     "storage_persist_granted": false,
-    "expected_session_digest": "cf63804da7df327c",
+    "expected_session_digest": "ee01fe5dae657304",
     "phase": "setup",
-    "ms": 343
+    "ms": 332
   },
   "phase_resume_after_restart": {
     "kind": "local-storage-test",
@@ -75,7 +75,7 @@
       {
         "name": "conversation.restored_state_matches_commit",
         "ok": true,
-        "detail": "restored session digest cf63804da7df327c"
+        "detail": "restored session digest ee01fe5dae657304"
       },
       {
         "name": "conversation.resume_messaging_after_restart",
@@ -104,7 +104,7 @@
       }
     ],
     "phase": "resume",
-    "ms": 290
+    "ms": 279
   },
   "console": []
 }

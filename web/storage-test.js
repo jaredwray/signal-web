@@ -178,7 +178,9 @@ async function run(phase, pass) {
   window.__storagetest = report;
 }
 
-const params = new URLSearchParams(location.search);
+// The test passphrase arrives in the URL fragment, which browsers never send
+// to the server, so even this test keeps it away from the hosting origin.
+const params = new URLSearchParams(location.hash.slice(1));
 if (params.has('phase')) {
   run(params.get('phase'), params.get('pass') ?? '').catch((err) => {
     window.__storagetest = { crashed: String(err), passed: 0, failed: 1, checks: [] };

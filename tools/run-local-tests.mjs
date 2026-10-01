@@ -95,17 +95,17 @@ async function storage(spec, origin, meta) {
   const passphrase = `test-only-${Math.random().toString(36).slice(2)}`;
   const q = `pass=${encodeURIComponent(passphrase)}`;
   try {
-    let p1 = await runOnce(spec, `${origin}/storage-test.html?phase=setup&${q}`, '__storagetest', { userDataDir: profile });
+    let p1 = await runOnce(spec, `${origin}/storage-test.html#phase=setup&${q}`, '__storagetest', { userDataDir: profile });
     let p2;
     if (supportsProfile) {
-      p2 = await runOnce(spec, `${origin}/storage-test.html?phase=resume&${q}`, '__storagetest', { userDataDir: profile });
+      p2 = await runOnce(spec, `${origin}/storage-test.html#phase=resume&${q}`, '__storagetest', { userDataDir: profile });
     } else {
       // safaridriver sessions do not keep website data between sessions, so a
       // real restart cannot be automated; fall back to a fresh page load in
       // the same session (weaker: same browser process).
       p1 = await runSameSession(spec, [
-        `${origin}/storage-test.html?phase=setup&${q}`,
-        `${origin}/storage-test.html?phase=resume&${q}`,
+        `${origin}/storage-test.html#phase=setup&${q}`,
+        `${origin}/storage-test.html#phase=resume&${q}`,
       ]);
       p2 = p1.second;
     }

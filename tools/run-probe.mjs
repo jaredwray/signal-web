@@ -130,6 +130,7 @@ async function probeOne(spec, origin, serverLog) {
   });
   const net = new Map();
   const navigation = {};
+  let appLink = null;
   let report;
   try {
     const entry = (id) => net.get(id) ?? net.set(id, { id }).get(id);
@@ -166,6 +167,15 @@ async function probeOne(spec, origin, serverLog) {
     for (const host of NAV_HOSTS) {
       navigation[host] = await browser.navigate(`https://${host}/`);
     }
+    // The real app's linking attempt, as a user would start it.
+    const app = await browser.open(`${origin}/index.html`);
+    await app.waitFor("document.querySelector('#link') && !document.querySelector('#link').disabled", 60_000);
+    await app.evaluate("document.querySelector('#link').click()");
+    await app.waitFor("/Could not|Scan|approved|closed/.test(document.querySelector('#link-status').textContent)", 60_000);
+    appLink = {
+      status_text: await app.evaluate("document.querySelector('#link-status').textContent"),
+      qr_shown: await app.evaluate("!document.querySelector('#qr').hidden"),
+    };
   } finally {
     await browser.close();
   }
@@ -181,6 +191,7 @@ async function probeOne(spec, origin, serverLog) {
     network_path: proxyServer ? 'explicit HTTPS CONNECT proxy from environment' : 'browser default',
     verdict: verdict(report, netlog, navigation, [...net.values()]),
     navigation,
+    app_link_attempt: appLink,
     page_report: report,
     devtools_network: [...net.values()].filter((r) => r.url && !r.url.startsWith(origin)),
     netlog,
@@ -222,6 +233,7 @@ async function main() {
       for (const [host, nav] of Object.entries(ev.navigation)) {
         console.log(`  navigate https://${host}/ -> ${nav.ok ? `ok ${nav.status ?? ''}` : nav.error}`);
       }
+      console.log(`  app link attempt: QR shown=${ev.app_link_attempt?.qr_shown} status="${ev.app_link_attempt?.status_text?.slice(0, 90)}..."`);
       console.log(`  VERDICT: ${ev.verdict.validity} - ${ev.verdict.reason}`);
       // Machine-readable copy for CI logs (no secrets: no credentials are used).
       console.log(`PROBE_EVIDENCE_JSON ${JSON.stringify(ev)}`);
