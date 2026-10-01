@@ -159,7 +159,10 @@ impl std::fmt::Display for ProvisioningError {
     }
 }
 
-fn derive_keys(private: &PrivateKey, their_public: &PublicKey) -> Result<[u8; 64], ProvisioningError> {
+fn derive_keys(
+    private: &PrivateKey,
+    their_public: &PublicKey,
+) -> Result<[u8; 64], ProvisioningError> {
     let shared = private
         .calculate_agreement(their_public)
         .map_err(|_| ProvisioningError::Envelope("key agreement failed"))?;
@@ -177,9 +180,15 @@ pub fn decrypt_envelope(
 ) -> Result<proto::ProvisionMessage, ProvisioningError> {
     let env = proto::ProvisionEnvelope::decode(envelope)
         .map_err(|_| ProvisioningError::Envelope("not a ProvisionEnvelope"))?;
-    let their = PublicKey::deserialize(env.public_key.as_deref().ok_or(ProvisioningError::Envelope("missing publicKey"))?)
-        .map_err(|_| ProvisioningError::Envelope("invalid publicKey"))?;
-    let body = env.body.ok_or(ProvisioningError::Envelope("missing body"))?;
+    let their = PublicKey::deserialize(
+        env.public_key
+            .as_deref()
+            .ok_or(ProvisioningError::Envelope("missing publicKey"))?,
+    )
+    .map_err(|_| ProvisioningError::Envelope("invalid publicKey"))?;
+    let body = env
+        .body
+        .ok_or(ProvisioningError::Envelope("missing body"))?;
     if body.len() < 1 + IV_LEN + 16 + MAC_LEN {
         return Err(ProvisioningError::Envelope("body too short"));
     }
@@ -192,7 +201,8 @@ pub fn decrypt_envelope(
     // Constant-time MAC check before touching the ciphertext.
     let mut hmac = Hmac::<Sha256>::new_from_slice(mac_key).expect("any key length");
     hmac.update(signed);
-    hmac.verify_slice(mac).map_err(|_| ProvisioningError::BadMac)?;
+    hmac.verify_slice(mac)
+        .map_err(|_| ProvisioningError::BadMac)?;
     let iv = &signed[1..1 + IV_LEN];
     let ciphertext = &signed[1 + IV_LEN..];
     let plaintext = signal_crypto::aes_256_cbc_decrypt(ciphertext, aes_key, iv)
@@ -228,7 +238,9 @@ fn form_urlencode(s: &str) -> String {
     let mut out = String::with_capacity(s.len() * 3);
     for b in s.bytes() {
         match b {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'*' | b'-' | b'.' | b'_' => out.push(b as char),
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'*' | b'-' | b'.' | b'_' => {
+                out.push(b as char)
+            }
             b' ' => out.push('+'),
             _ => out.push_str(&format!("%{b:02X}")),
         }
@@ -292,10 +304,15 @@ impl From<&proto::ProvisionMessage> for ProvisionSummary {
             pni: m.pni.clone(),
             has_number: m.number.as_ref().is_some_and(|n| !n.is_empty()),
             has_provisioning_code: m.provisioning_code.as_ref().is_some_and(|c| !c.is_empty()),
-            has_aci_identity_key_pair: present(&m.aci_identity_key_private) && present(&m.aci_identity_key_public),
-            has_pni_identity_key_pair: present(&m.pni_identity_key_private) && present(&m.pni_identity_key_public),
+            has_aci_identity_key_pair: present(&m.aci_identity_key_private)
+                && present(&m.aci_identity_key_public),
+            has_pni_identity_key_pair: present(&m.pni_identity_key_private)
+                && present(&m.pni_identity_key_public),
             has_profile_key: present(&m.profile_key),
-            has_account_entropy_pool: m.account_entropy_pool.as_ref().is_some_and(|a| !a.is_empty()),
+            has_account_entropy_pool: m
+                .account_entropy_pool
+                .as_ref()
+                .is_some_and(|a| !a.is_empty()),
             has_master_key: present(&m.master_key),
             provisioning_version: m.provisioning_version,
         }
@@ -308,7 +325,10 @@ pub enum FrameEvent {
     /// The server assigned a provisioning address: show `link_url` as a QR code.
     Address { link_url: String, ack_b64: String },
     /// The phone approved: the envelope decrypted successfully.
-    Provisioned { summary: ProvisionSummary, ack_b64: String },
+    Provisioned {
+        summary: ProvisionSummary,
+        ack_b64: String,
+    },
     /// A response frame or other message that needs no action.
     Ignored { reason: String },
 }
@@ -323,7 +343,11 @@ pub struct ProvisioningSession {
 
 impl ProvisioningSession {
     pub fn from_key_pair(key_pair: KeyPair) -> Self {
-        Self { key_pair, address: None, provisioned: None }
+        Self {
+            key_pair,
+            address: None,
+            provisioned: None,
+        }
     }
 
     pub fn public_key(&self) -> PublicKey {
@@ -335,29 +359,38 @@ impl ProvisioningSession {
     }
 
     pub fn handle(&mut self, frame: &[u8]) -> Result<FrameEvent, ProvisioningError> {
-        let msg = proto::WebSocketMessage::decode(frame).map_err(|_| ProvisioningError::Frame("not a WebSocketMessage"))?;
+        let msg = proto::WebSocketMessage::decode(frame)
+            .map_err(|_| ProvisioningError::Frame("not a WebSocketMessage"))?;
         if msg.r#type != Some(proto::TYPE_REQUEST) {
-            return Ok(FrameEvent::Ignored { reason: format!("frame type {:?}", msg.r#type) });
+            return Ok(FrameEvent::Ignored {
+                reason: format!("frame type {:?}", msg.r#type),
+            });
         }
-        let req = msg.request.ok_or(ProvisioningError::Frame("missing request"))?;
-        let id = req.id.ok_or(ProvisioningError::Frame("missing request id"))?;
+        let req = msg
+            .request
+            .ok_or(ProvisioningError::Frame("missing request"))?;
+        let id = req
+            .id
+            .ok_or(ProvisioningError::Frame("missing request id"))?;
         if req.verb.as_deref() != Some("PUT") {
             return Err(ProvisioningError::Frame("unexpected verb"));
         }
         let ack_b64 = base64::engine::general_purpose::STANDARD.encode(ack(id));
         match req.path.as_deref() {
             Some("/v1/address") => {
-                let addr = proto::ProvisioningAddress::decode(req.body.unwrap_or_default().as_slice())
-                    .map_err(|_| ProvisioningError::Frame("bad ProvisioningAddress"))?
-                    .address
-                    .filter(|a| !a.is_empty())
-                    .ok_or(ProvisioningError::Frame("empty provisioning address"))?;
+                let addr =
+                    proto::ProvisioningAddress::decode(req.body.unwrap_or_default().as_slice())
+                        .map_err(|_| ProvisioningError::Frame("bad ProvisioningAddress"))?
+                        .address
+                        .filter(|a| !a.is_empty())
+                        .ok_or(ProvisioningError::Frame("empty provisioning address"))?;
                 let link_url = link_url(&addr, &self.key_pair.public_key);
                 self.address = Some(addr);
                 Ok(FrameEvent::Address { link_url, ack_b64 })
             }
             Some("/v1/message") => {
-                let message = decrypt_envelope(&self.key_pair.private_key, &req.body.unwrap_or_default())?;
+                let message =
+                    decrypt_envelope(&self.key_pair.private_key, &req.body.unwrap_or_default())?;
                 let summary = ProvisionSummary::from(&message);
                 self.provisioned = Some(message);
                 Ok(FrameEvent::Provisioned { summary, ack_b64 })
@@ -378,7 +411,9 @@ impl ProvisioningSession {
     /// JSON FrameEvent. `ack_b64` must be sent back on the socket.
     #[wasm_bindgen(js_name = handleFrame)]
     pub fn handle_frame(&mut self, frame: &[u8]) -> Result<String, JsError> {
-        let event = self.handle(frame).map_err(|e| JsError::new(&e.to_string()))?;
+        let event = self
+            .handle(frame)
+            .map_err(|e| JsError::new(&e.to_string()))?;
         Ok(serde_json::to_string(&event).expect("serializable"))
     }
 

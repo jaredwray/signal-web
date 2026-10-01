@@ -163,19 +163,30 @@ async function probeOne(spec, origin, serverLog) {
       report = await page.evaluate('window.__probe');
       report.console = page.console.filter((l) => /signal\.org/.test(l.text));
     }
-    // Browser-native TLS verdict per host via top-level navigation.
+    // The real app's linking attempt, as a user would start it. Failures here
+    // are recorded (with the page's own status text) rather than aborting.
+    const app = await browser.open(`${origin}/index.html`);
+    const text = (sel) => app.evaluate(`document.querySelector('${sel}')?.textContent ?? null`).catch(() => null);
+    try {
+      await app.waitFor("document.querySelector('#link') && !document.querySelector('#link').disabled", 60_000);
+      await app.evaluate("document.querySelector('#link').click()");
+      await app.waitFor("/Could not|Scan|approved|closed/.test(document.querySelector('#link-status').textContent)", 60_000);
+      appLink = {
+        status_text: await text('#link-status'),
+        qr_shown: await app.evaluate("!document.querySelector('#qr').hidden"),
+      };
+    } catch (err) {
+      appLink = {
+        error: String(err.message ?? err).split('\n')[0],
+        env_text: await text('#env'),
+        status_text: await text('#link-status'),
+      };
+    }
+    // Then the browser's own TLS verdict per host via top-level navigation
+    // (last, because certificate-warning pages can disturb later automation).
     for (const host of NAV_HOSTS) {
       navigation[host] = await browser.navigate(`https://${host}/`);
     }
-    // The real app's linking attempt, as a user would start it.
-    const app = await browser.open(`${origin}/index.html`);
-    await app.waitFor("document.querySelector('#link') && !document.querySelector('#link').disabled", 60_000);
-    await app.evaluate("document.querySelector('#link').click()");
-    await app.waitFor("/Could not|Scan|approved|closed/.test(document.querySelector('#link-status').textContent)", 60_000);
-    appLink = {
-      status_text: await app.evaluate("document.querySelector('#link-status').textContent"),
-      qr_shown: await app.evaluate("!document.querySelector('#qr').hidden"),
-    };
   } finally {
     await browser.close();
   }

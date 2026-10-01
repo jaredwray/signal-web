@@ -234,7 +234,10 @@ async fn exchange(
     let from_addr = from.address.clone();
     let wire = send(from, &to_addr, text.as_bytes(), rng).await?;
     let plain = receive(to, &from_addr, &wire, rng).await?;
-    ensure(plain == text.as_bytes(), format!("plaintext mismatch for {text:?}"))?;
+    ensure(
+        plain == text.as_bytes(),
+        format!("plaintext mismatch for {text:?}"),
+    )?;
     Ok(wire.kind)
 }
 
@@ -309,7 +312,12 @@ async fn restore(s: &Snapshot) -> R<Party> {
 }
 
 /// Returns Ok(stage) if the tampered message was rejected at parse or decrypt.
-async fn expect_rejected(to: &mut Party, from: &ProtocolAddress, w: &Wire, rng: &mut ThreadRng) -> R<String> {
+async fn expect_rejected(
+    to: &mut Party,
+    from: &ProtocolAddress,
+    w: &Wire,
+    rng: &mut ThreadRng,
+) -> R<String> {
     match parse(w) {
         Err(err) => Ok(format!("rejected at parse ({err})")),
         Ok(_) => match receive(to, from, w, rng).await {
@@ -360,10 +368,16 @@ async fn run_inner(report: &mut Report) -> R<()> {
             .private_key()
             .calculate_signature(msg, rng)
             .map_err(ctx("sign"))?;
-        ensure(identity.public_key().verify_signature(msg, &sig), "valid signature rejected")?;
+        ensure(
+            identity.public_key().verify_signature(msg, &sig),
+            "valid signature rejected",
+        )?;
         let mut bad = sig.to_vec();
         bad[10] ^= 1;
-        ensure(!identity.public_key().verify_signature(msg, &bad), "tampered signature accepted")?;
+        ensure(
+            !identity.public_key().verify_signature(msg, &bad),
+            "tampered signature accepted",
+        )?;
         Ok(format!(
             "identity public key {} bytes, signature {} bytes",
             identity.public_key().serialize().len(),
@@ -392,7 +406,10 @@ async fn run_inner(report: &mut Report) -> R<()> {
     let mut bob_bundle: Option<PreKeyBundle> = None;
     step!(report, "pqxdh.publish_bundle_with_kyber", {
         let bundle = publish_bundle(&mut bob, rng).await?;
-        ensure(bundle.kyber_pre_key_public().is_ok(), "bundle lacks kyber prekey")?;
+        ensure(
+            bundle.kyber_pre_key_public().is_ok(),
+            "bundle lacks kyber prekey",
+        )?;
         bob_bundle = Some(bundle);
         Ok("signed prekey + one-time prekey + Kyber1024 prekey".into())
     });
@@ -414,13 +431,19 @@ async fn run_inner(report: &mut Report) -> R<()> {
 
     step!(report, "session.first_message_is_prekey_message", {
         let kind = exchange(&mut alice, &mut bob, "hello bob (1)", rng).await?;
-        ensure(kind == CiphertextMessageType::PreKey, "first message not a PreKeySignalMessage")?;
+        ensure(
+            kind == CiphertextMessageType::PreKey,
+            "first message not a PreKeySignalMessage",
+        )?;
         Ok("PreKeySignalMessage decrypted by Bob".into())
     });
 
     step!(report, "session.reply_is_signal_message", {
         let kind = exchange(&mut bob, &mut alice, "hi alice (1)", rng).await?;
-        ensure(kind == CiphertextMessageType::Whisper, "reply not a SignalMessage")?;
+        ensure(
+            kind == CiphertextMessageType::Whisper,
+            "reply not a SignalMessage",
+        )?;
         Ok("SignalMessage decrypted by Alice".into())
     });
 
@@ -450,8 +473,20 @@ async fn run_inner(report: &mut Report) -> R<()> {
     step!(report, "session.evolution_40_messages", {
         let before = session_bytes(&alice, &bob_addr).await?;
         for i in 0..20 {
-            exchange(&mut alice, &mut bob, &format!("a->b round {i} {}", rng.random::<u64>()), rng).await?;
-            exchange(&mut bob, &mut alice, &format!("b->a round {i} {}", rng.random::<u64>()), rng).await?;
+            exchange(
+                &mut alice,
+                &mut bob,
+                &format!("a->b round {i} {}", rng.random::<u64>()),
+                rng,
+            )
+            .await?;
+            exchange(
+                &mut bob,
+                &mut alice,
+                &format!("b->a round {i} {}", rng.random::<u64>()),
+                rng,
+            )
+            .await?;
         }
         let after = session_bytes(&alice, &bob_addr).await?;
         ensure(before != after, "session state did not change")?;
@@ -466,7 +501,10 @@ async fn run_inner(report: &mut Report) -> R<()> {
         let mut wires = Vec::new();
         for i in 0..6 {
             let text = format!("burst {i}");
-            wires.push((text.clone(), send(&mut alice, &bob_addr, text.as_bytes(), rng).await?));
+            wires.push((
+                text.clone(),
+                send(&mut alice, &bob_addr, text.as_bytes(), rng).await?,
+            ));
         }
         for idx in [3usize, 0, 5, 1, 4, 2] {
             let (text, wire) = &wires[idx];
@@ -484,8 +522,20 @@ async fn run_inner(report: &mut Report) -> R<()> {
         alice = restore(&a).await?;
         bob = restore(&b).await?;
         for i in 0..5 {
-            exchange(&mut alice, &mut bob, &format!("after restore a->b {i}"), rng).await?;
-            exchange(&mut bob, &mut alice, &format!("after restore b->a {i}"), rng).await?;
+            exchange(
+                &mut alice,
+                &mut bob,
+                &format!("after restore a->b {i}"),
+                rng,
+            )
+            .await?;
+            exchange(
+                &mut bob,
+                &mut alice,
+                &format!("after restore b->a {i}"),
+                rng,
+            )
+            .await?;
         }
         Ok(format!(
             "rebuilt both stores from {total} serialized bytes; 10 more messages OK"
@@ -544,13 +594,19 @@ async fn run_inner(report: &mut Report) -> R<()> {
         .await
         .map_err(ctx("process bundle"))?;
         let w = send(&mut carol, &dave_addr, b"first contact", rng).await?;
-        ensure(w.kind == CiphertextMessageType::PreKey, "not a prekey message")?;
+        ensure(
+            w.kind == CiphertextMessageType::PreKey,
+            "not a prekey message",
+        )?;
         let mut bad = w.clone();
         let n = bad.bytes.len();
         bad.bytes[n - 3] ^= 0x04;
         let stage = expect_rejected(&mut dave, &carol_addr, &bad, rng).await?;
         let plain = receive(&mut dave, &carol_addr, &w, rng).await?;
-        ensure(plain == b"first contact", "original prekey message failed after rejection")?;
+        ensure(
+            plain == b"first contact",
+            "original prekey message failed after rejection",
+        )?;
         Ok(format!("{stage}; untampered original then accepted"))
     });
 
@@ -564,8 +620,9 @@ async fn run_inner(report: &mut Report) -> R<()> {
         .await
         .map_err(ctx("identity"))?;
     let expires = Timestamp::from_epoch_millis(clock::now_millis() + 86_400_000);
-    let server_cert = ServerCertificate::new(1, server_key.public_key, &trust_root.private_key, rng)
-        .map_err(ctx("server cert"))?;
+    let server_cert =
+        ServerCertificate::new(1, server_key.public_key, &trust_root.private_key, rng)
+            .map_err(ctx("server cert"))?;
     let sender_cert = SenderCertificate::new(
         alice_addr.name().to_owned(),
         None,
@@ -598,7 +655,12 @@ async fn run_inner(report: &mut Report) -> R<()> {
         .map_err(ctx("sealed_sender_encrypt"))
     }
 
-    async fn unseal(to: &mut Party, ct: &[u8], root: &PublicKey, at_millis: u64) -> R<SealedSenderDecryptionResult> {
+    async fn unseal(
+        to: &mut Party,
+        ct: &[u8],
+        root: &PublicKey,
+        at_millis: u64,
+    ) -> R<SealedSenderDecryptionResult> {
         sealed_sender_decrypt(
             ct,
             root,
@@ -621,8 +683,14 @@ async fn run_inner(report: &mut Report) -> R<()> {
         let res = unseal(&mut bob, &ct, &trust_root.public_key, clock::now_millis()).await?;
         ensure(res.message == b"sealed hello", "plaintext mismatch")?;
         ensure(res.sender_uuid == alice_addr.name(), "sender uuid mismatch")?;
-        ensure(res.device_id == alice_addr.device_id(), "sender device mismatch")?;
-        Ok(format!("{} byte envelope; sender certificate verified", ct.len()))
+        ensure(
+            res.device_id == alice_addr.device_id(),
+            "sender device mismatch",
+        )?;
+        Ok(format!(
+            "{} byte envelope; sender certificate verified",
+            ct.len()
+        ))
     });
 
     step!(report, "sealed_sender.reject_untrusted_root", {
@@ -631,16 +699,29 @@ async fn run_inner(report: &mut Report) -> R<()> {
         match unseal(&mut bob, &ct, &other_root.public_key, clock::now_millis()).await {
             Ok(_) => Err("accepted certificate from untrusted root".into()),
             Err(err) => {
-                let res = unseal(&mut bob, &ct, &trust_root.public_key, clock::now_millis()).await?;
-                ensure(res.message == b"wrong root", "retry with correct root failed")?;
-                Ok(format!("rejected ({err}); same envelope accepted with the correct root"))
+                let res =
+                    unseal(&mut bob, &ct, &trust_root.public_key, clock::now_millis()).await?;
+                ensure(
+                    res.message == b"wrong root",
+                    "retry with correct root failed",
+                )?;
+                Ok(format!(
+                    "rejected ({err}); same envelope accepted with the correct root"
+                ))
             }
         }
     });
 
     step!(report, "sealed_sender.reject_expired_certificate", {
         let ct = sealed(&mut alice, &bob_addr, &sender_cert, b"expired", rng).await?;
-        match unseal(&mut bob, &ct, &trust_root.public_key, expires.epoch_millis() + 1).await {
+        match unseal(
+            &mut bob,
+            &ct,
+            &trust_root.public_key,
+            expires.epoch_millis() + 1,
+        )
+        .await
+        {
             Ok(_) => Err("accepted expired sender certificate".into()),
             Err(err) => Ok(format!("rejected ({err})")),
         }
@@ -729,8 +810,14 @@ fn check_ack(ack_b64: &str, id: u64) -> R<()> {
         .map_err(ctx("ack base64"))?;
     let msg = pproto::WebSocketMessage::decode(bytes.as_slice()).map_err(ctx("ack decode"))?;
     let resp = msg.response.ok_or("ack has no response")?;
-    ensure(msg.r#type == Some(pproto::TYPE_RESPONSE), "ack is not a RESPONSE")?;
-    ensure(resp.id == Some(id) && resp.status == Some(200), "ack id/status mismatch")
+    ensure(
+        msg.r#type == Some(pproto::TYPE_RESPONSE),
+        "ack is not a RESPONSE",
+    )?;
+    ensure(
+        resp.id == Some(id) && resp.status == Some(200),
+        "ack id/status mismatch",
+    )
 }
 
 fn percent_decode(s: &str) -> R<String> {
@@ -762,6 +849,14 @@ fn tamper_envelope(envelope: &[u8], f: impl FnOnce(&mut pproto::ProvisionEnvelop
     env.encode_to_vec()
 }
 
+/// (check name, tampered envelope, recipient key, expected rejection)
+type TamperCase<'a> = (
+    &'static str,
+    Vec<u8>,
+    &'a PrivateKey,
+    fn(&ProvisioningError) -> bool,
+);
+
 pub async fn run_provisioning(vector_json: &str) -> Report {
     let mut report = Report {
         kind: "local-provisioning-selftest",
@@ -781,7 +876,10 @@ pub async fn run_provisioning(vector_json: &str) -> Report {
 async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()> {
     step!(report, "provisioning.qr_withheld_until_server_address", {
         let session = ProvisioningSession::new();
-        ensure(session.link_qr_svg().is_none(), "QR produced before the server assigned an address")?;
+        ensure(
+            session.link_qr_svg().is_none(),
+            "QR produced before the server assigned an address",
+        )?;
         Ok("no QR code is produced before a ProvisioningAddress arrives".into())
     });
 
@@ -791,7 +889,10 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
         let frame = server_frame(
             7,
             "/v1/address",
-            pproto::ProvisioningAddress { address: Some(address.into()) }.encode_to_vec(),
+            pproto::ProvisioningAddress {
+                address: Some(address.into()),
+            }
+            .encode_to_vec(),
         );
         let provisioning::FrameEvent::Address { link_url, ack_b64 } =
             session.handle(&frame).map_err(ctx("handle"))?
@@ -800,17 +901,32 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
         };
         check_ack(&ack_b64, 7)?;
         let prefix = "sgnl://linkdevice?uuid=Ab%2Bcd%2Fef%3D%3D&pub_key=";
-        ensure(link_url.starts_with(prefix), format!("unexpected URL {link_url}"))?;
-        ensure(link_url.ends_with("&capabilities=nopni"), "capabilities missing")?;
+        ensure(
+            link_url.starts_with(prefix),
+            format!("unexpected URL {link_url}"),
+        )?;
+        ensure(
+            link_url.ends_with("&capabilities=nopni"),
+            "capabilities missing",
+        )?;
         let pub_key = &link_url[prefix.len()..link_url.len() - "&capabilities=nopni".len()];
         let decoded = base64::engine::general_purpose::STANDARD
             .decode(percent_decode(pub_key)?)
             .map_err(ctx("pub_key base64"))?;
-        ensure(decoded == session.public_key().serialize().to_vec(), "pub_key does not round-trip")?;
-        ensure(decoded.len() == 33 && decoded[0] == 0x05, "pub_key not a 33-byte typed Curve25519 key")?;
+        ensure(
+            decoded == session.public_key().serialize().to_vec(),
+            "pub_key does not round-trip",
+        )?;
+        ensure(
+            decoded.len() == 33 && decoded[0] == 0x05,
+            "pub_key not a 33-byte typed Curve25519 key",
+        )?;
         let svg = session.link_qr_svg().ok_or("no QR after address")?;
         ensure(svg.contains("<svg"), "QR is not SVG")?;
-        Ok(format!("URL format matches Signal-Desktop linkDeviceRoute; QR SVG {} bytes; ack id 7 status 200", svg.len()))
+        Ok(format!(
+            "URL format matches Signal-Desktop linkDeviceRoute; QR SVG {} bytes; ack id 7 status 200",
+            svg.len()
+        ))
     });
 
     step!(report, "provisioning.roundtrip_envelope_frame", {
@@ -832,14 +948,21 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
             return Err("expected a Provisioned event".into());
         };
         check_ack(&ack_b64, 8)?;
-        ensure(session.provisioned() == Some(&message), "decrypted message differs")?;
-        ensure(summary.has_provisioning_code && summary.has_aci_identity_key_pair, "summary incomplete")?;
+        ensure(
+            session.provisioned() == Some(&message),
+            "decrypted message differs",
+        )?;
+        ensure(
+            summary.has_provisioning_code && summary.has_aci_identity_key_pair,
+            "summary incomplete",
+        )?;
         Ok("envelope frame decrypted, acknowledged, secrets kept in WASM".into())
     });
 
     let vector: Vector = serde_json::from_str(vector_json).map_err(ctx("vector json"))?;
     let hexd = |s: &str| hex::decode(s).map_err(ctx("hex"));
-    let private = PrivateKey::deserialize(&hexd(&vector.recipient_private_key_hex)?).map_err(ctx("private key"))?;
+    let private = PrivateKey::deserialize(&hexd(&vector.recipient_private_key_hex)?)
+        .map_err(ctx("private key"))?;
     let public = private.public_key().map_err(ctx("public key"))?;
     let envelope = hexd(&vector.envelope_hex)?;
 
@@ -852,40 +975,105 @@ async fn run_provisioning_inner(report: &mut Report, vector_json: &str) -> R<()>
         let e = &vector.expected;
         ensure(m.aci.as_deref() == Some(e.aci.as_str()), "aci")?;
         ensure(m.number.as_deref() == Some(e.number.as_str()), "number")?;
-        ensure(m.provisioning_code.as_deref() == Some(e.provisioning_code.as_str()), "provisioning code")?;
-        ensure(m.profile_key.as_deref() == Some(hexd(&e.profile_key_hex)?.as_slice()), "profile key")?;
-        ensure(m.account_entropy_pool.as_deref() == Some(e.account_entropy_pool.as_str()), "AEP")?;
+        ensure(
+            m.provisioning_code.as_deref() == Some(e.provisioning_code.as_str()),
+            "provisioning code",
+        )?;
+        ensure(
+            m.profile_key.as_deref() == Some(hexd(&e.profile_key_hex)?.as_slice()),
+            "profile key",
+        )?;
+        ensure(
+            m.account_entropy_pool.as_deref() == Some(e.account_entropy_pool.as_str()),
+            "AEP",
+        )?;
         let id_pub = hexd(&e.aci_identity_public_hex)?;
-        ensure(m.aci_identity_key_public.as_deref() == Some(id_pub.as_slice()), "identity public")?;
+        ensure(
+            m.aci_identity_key_public.as_deref() == Some(id_pub.as_slice()),
+            "identity public",
+        )?;
         // The shared identity private key must match the shared public key.
-        let id_priv = PrivateKey::deserialize(m.aci_identity_key_private.as_deref().ok_or("no identity private")?)
-            .map_err(ctx("identity private"))?;
-        ensure(id_priv.public_key().map_err(ctx("derive"))?.serialize().to_vec() == id_pub, "identity key pair inconsistent")?;
+        let id_priv = PrivateKey::deserialize(
+            m.aci_identity_key_private
+                .as_deref()
+                .ok_or("no identity private")?,
+        )
+        .map_err(ctx("identity private"))?;
+        ensure(
+            id_priv
+                .public_key()
+                .map_err(ctx("derive"))?
+                .serialize()
+                .to_vec()
+                == id_pub,
+            "identity key pair inconsistent",
+        )?;
         let aci_binary = m.aci_binary.as_deref().ok_or("no aciBinary")?;
-        ensure(hex::encode(aci_binary) == e.aci.replace('-', ""), "aciBinary")?;
-        Ok(format!("{}-byte envelope from a separate Python implementation decrypted; all fields match", envelope.len()))
+        ensure(
+            hex::encode(aci_binary) == e.aci.replace('-', ""),
+            "aciBinary",
+        )?;
+        Ok(format!(
+            "{}-byte envelope from a separate Python implementation decrypted; all fields match",
+            envelope.len()
+        ))
     });
 
     let other = KeyPair::generate(&mut rand::rng());
-    let cases: [(&str, Vec<u8>, &PrivateKey, fn(&ProvisioningError) -> bool); 6] = [
-        ("provisioning.reject_flipped_mac", tamper_envelope(&envelope, |e| {
-            let b = e.body.as_mut().unwrap();
-            let n = b.len();
-            b[n - 1] ^= 1;
-        }), &private, |e| *e == ProvisioningError::BadMac),
-        ("provisioning.reject_flipped_ciphertext", tamper_envelope(&envelope, |e| {
-            e.body.as_mut().unwrap()[20] ^= 1;
-        }), &private, |e| *e == ProvisioningError::BadMac),
-        ("provisioning.reject_unknown_version", tamper_envelope(&envelope, |e| {
-            e.body.as_mut().unwrap()[0] = 2;
-        }), &private, |e| *e == ProvisioningError::BadVersion(2)),
-        ("provisioning.reject_truncated_body", tamper_envelope(&envelope, |e| {
-            e.body.as_mut().unwrap().truncate(40);
-        }), &private, |e| matches!(e, ProvisioningError::Envelope(_))),
-        ("provisioning.reject_substituted_sender_key", tamper_envelope(&envelope, |e| {
-            e.public_key = Some(KeyPair::generate(&mut rand::rng()).public_key.serialize().to_vec());
-        }), &private, |e| *e == ProvisioningError::BadMac),
-        ("provisioning.reject_wrong_recipient", envelope.clone(), &other.private_key, |e| *e == ProvisioningError::BadMac),
+    let cases: [TamperCase<'_>; 6] = [
+        (
+            "provisioning.reject_flipped_mac",
+            tamper_envelope(&envelope, |e| {
+                let b = e.body.as_mut().unwrap();
+                let n = b.len();
+                b[n - 1] ^= 1;
+            }),
+            &private,
+            |e| *e == ProvisioningError::BadMac,
+        ),
+        (
+            "provisioning.reject_flipped_ciphertext",
+            tamper_envelope(&envelope, |e| {
+                e.body.as_mut().unwrap()[20] ^= 1;
+            }),
+            &private,
+            |e| *e == ProvisioningError::BadMac,
+        ),
+        (
+            "provisioning.reject_unknown_version",
+            tamper_envelope(&envelope, |e| {
+                e.body.as_mut().unwrap()[0] = 2;
+            }),
+            &private,
+            |e| *e == ProvisioningError::BadVersion(2),
+        ),
+        (
+            "provisioning.reject_truncated_body",
+            tamper_envelope(&envelope, |e| {
+                e.body.as_mut().unwrap().truncate(40);
+            }),
+            &private,
+            |e| matches!(e, ProvisioningError::Envelope(_)),
+        ),
+        (
+            "provisioning.reject_substituted_sender_key",
+            tamper_envelope(&envelope, |e| {
+                e.public_key = Some(
+                    KeyPair::generate(&mut rand::rng())
+                        .public_key
+                        .serialize()
+                        .to_vec(),
+                );
+            }),
+            &private,
+            |e| *e == ProvisioningError::BadMac,
+        ),
+        (
+            "provisioning.reject_wrong_recipient",
+            envelope.clone(),
+            &other.private_key,
+            |e| *e == ProvisioningError::BadMac,
+        ),
     ];
     for (name, bytes, key, expected) in cases {
         step!(report, name, {
@@ -911,7 +1099,8 @@ use wasm_bindgen::prelude::*;
 
 fn now_or_fail<F: std::future::Future>(f: F) -> F::Output {
     // libsignal's in-memory stores never actually suspend.
-    f.now_or_never().expect("in-memory store futures complete immediately")
+    f.now_or_never()
+        .expect("in-memory store futures complete immediately")
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -966,7 +1155,8 @@ impl LocalConversation {
         let mut rng = rand::rng();
         let mut alice = Party::new(&mut rng, None).map_err(|e| JsError::new(&e))?;
         let mut bob = Party::new(&mut rng, None).map_err(|e| JsError::new(&e))?;
-        let bundle = now_or_fail(publish_bundle(&mut bob, &mut rng)).map_err(|e| JsError::new(&e))?;
+        let bundle =
+            now_or_fail(publish_bundle(&mut bob, &mut rng)).map_err(|e| JsError::new(&e))?;
         let (alice_addr, bob_addr) = (alice.address.clone(), bob.address.clone());
         now_or_fail(process_prekey_bundle(
             &bob_addr,
@@ -989,7 +1179,8 @@ impl LocalConversation {
     pub fn from_snapshot(bytes: &[u8]) -> Result<LocalConversation, JsError> {
         let (a, b): (SnapshotWire, SnapshotWire) =
             serde_json::from_slice(bytes).map_err(|e| JsError::new(&format!("snapshot: {e}")))?;
-        let restore_one = |w: SnapshotWire| -> R<Party> { now_or_fail(restore(&w.into_snapshot()?)) };
+        let restore_one =
+            |w: SnapshotWire| -> R<Party> { now_or_fail(restore(&w.into_snapshot()?)) };
         Ok(LocalConversation {
             alice: restore_one(a).map_err(|e| JsError::new(&e))?,
             bob: restore_one(b).map_err(|e| JsError::new(&e))?,
@@ -999,8 +1190,10 @@ impl LocalConversation {
     /// Serialized identity keys, registration ids and session records.
     /// Contains private key material: callers must encrypt it before storing.
     pub fn snapshot(&self) -> Result<Vec<u8>, JsError> {
-        let a = now_or_fail(snapshot(&self.alice, &self.bob.address)).map_err(|e| JsError::new(&e))?;
-        let b = now_or_fail(snapshot(&self.bob, &self.alice.address)).map_err(|e| JsError::new(&e))?;
+        let a =
+            now_or_fail(snapshot(&self.alice, &self.bob.address)).map_err(|e| JsError::new(&e))?;
+        let b =
+            now_or_fail(snapshot(&self.bob, &self.alice.address)).map_err(|e| JsError::new(&e))?;
         serde_json::to_vec(&(SnapshotWire::from(&a), SnapshotWire::from(&b)))
             .map_err(|e| JsError::new(&e.to_string()))
     }
@@ -1020,7 +1213,8 @@ impl LocalConversation {
     #[wasm_bindgen(js_name = aliceSessionDigest)]
     pub fn alice_session_digest(&self) -> Result<String, JsError> {
         use sha2::Digest as _;
-        let bytes = now_or_fail(session_bytes(&self.alice, &self.bob.address)).map_err(|e| JsError::new(&e))?;
+        let bytes = now_or_fail(session_bytes(&self.alice, &self.bob.address))
+            .map_err(|e| JsError::new(&e))?;
         Ok(hex::encode(&sha2::Sha256::digest(&bytes)[..8]))
     }
 }
@@ -1034,8 +1228,10 @@ impl LocalConversation {
             (&mut self.bob, &mut self.alice)
         };
         let (from_addr, to_addr) = (from.address.clone(), to.address.clone());
-        let wire = now_or_fail(send(from, &to_addr, text.as_bytes(), &mut rng)).map_err(|e| JsError::new(&e))?;
-        let plain = now_or_fail(receive(to, &from_addr, &wire, &mut rng)).map_err(|e| JsError::new(&e))?;
+        let wire = now_or_fail(send(from, &to_addr, text.as_bytes(), &mut rng))
+            .map_err(|e| JsError::new(&e))?;
+        let plain =
+            now_or_fail(receive(to, &from_addr, &wire, &mut rng)).map_err(|e| JsError::new(&e))?;
         String::from_utf8(plain).map_err(|e| JsError::new(&e.to_string()))
     }
 }
