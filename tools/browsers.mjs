@@ -169,7 +169,8 @@ async function openWebDriver(spec, s, { userDataDir }) {
       }
       const json = await res.json().catch(() => ({}));
       if (!res.ok || json.value?.error) {
-        return { ok: false, reached: false, error: `${json.value?.error ?? res.status}: ${String(json.value?.message ?? '').split('\n')[0]}` };
+        const message = String(json.value?.message ?? '').split('\n')[0];
+        return { ok: false, reached: false, error: `${json.value?.error ?? res.status}${message ? `: ${message}` : ''}` };
       }
       let landed = null;
       for (let i = 0; i < 10; i++) {

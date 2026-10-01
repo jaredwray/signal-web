@@ -3,15 +3,15 @@
   "label": "LOCAL tests from libsignal rust/protocol/tests; not a live Signal test",
   "libsignal_rev": "e8cc2dddd578859b4a029c9c94670b24ce2b616a",
   "transforms": "scripts/wasmify_upstream_tests.py (#[test] attribute + SystemTime::now() shim only)",
-  "generated_at": "2026-10-01T15:04:49.657Z",
-  "ci_run": null,
-  "browser_spec": "pw:chromium",
-  "browser": "141.0.7390.37",
+  "generated_at": "2026-10-01T15:04:35.940Z",
+  "ci_run": "https://github.com/jaredwray/signal-web/actions/runs/36880051338",
+  "browser_spec": "wd:firefox@http://127.0.0.1:4444",
+  "browser": "firefox 156.0 on linux",
   "tools": {
-    "node": "v22.22.0",
+    "node": "v22.23.3",
     "playwright": "1.56.1",
-    "os": "linux 6.18.44-fc-v50",
-    "runner_image": null
+    "os": "linux 6.17.0-1022-azure",
+    "runner_image": "ubuntu24 20260927.320.1"
   },
   "request_interception": "none",
   "include_ignored": true,
@@ -22,9 +22,9 @@
     {
       "binary": "ratchet",
       "wasm": "ratchet-a905bc348a965c00.wasm",
-      "browser": "141.0.7390.37",
-      "seconds": 0.198,
-      "summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.02s",
+      "browser": "firefox 156.0 on linux",
+      "seconds": 0.829,
+      "summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.03s",
       "tests": [
         {
           "name": "test_bob_rejects_torsioned_basekey",
@@ -38,15 +38,14 @@
           "name": "test_alice_and_bob_agree_on_chain_keys_with_kyber",
           "status": "ok"
         }
-      ],
-      "output": "Loading Wasm module...\n\nrunning 3 tests\ntest test_bob_rejects_torsioned_basekey ... ok\ntest test_bob_rejects_highbit_basekey ... ok\ntest test_alice_and_bob_agree_on_chain_keys_with_kyber ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.02s\n\n"
+      ]
     },
     {
       "binary": "groups",
       "wasm": "groups-268a20a4e92458d4.wasm",
-      "browser": "141.0.7390.37",
-      "seconds": 3.397,
-      "summary": "test result: ok. 12 passed; 0 failed; 0 ignored; 0 filtered out; finished in 3.22s",
+      "browser": "firefox 156.0 on linux",
+      "seconds": 4.316,
+      "summary": "test result: ok. 12 passed; 0 failed; 0 ignored; 0 filtered out; finished in 3.97s",
       "tests": [
         {
           "name": "group_sealed_sender_multiple_devices_and_excluded_recipients",
@@ -96,15 +95,14 @@
           "name": "group_too_far_in_the_future",
           "status": "ok"
         }
-      ],
-      "output": "Loading Wasm module...\n\nrunning 12 tests\ntest group_sealed_sender_multiple_devices_and_excluded_recipients ... ok\ntest group_sealed_sender_multiple_devices ... ok\ntest group_sealed_sender ... ok\ntest group_out_of_order ... ok\ntest group_no_send_session ... ok\ntest group_no_recv_session ... ok\ntest group_message_key_limit ... ok\ntest group_late_join ... ok\ntest group_large_messages ... ok\ntest group_basic_ratchet ... ok\ntest group_basic_encrypt_decrypt ... ok\ntest group_too_far_in_the_future ... ok\n\ntest result: ok. 12 passed; 0 failed; 0 ignored; 0 filtered out; finished in 3.22s\n\n"
+      ]
     },
     {
       "binary": "sealed_sender",
       "wasm": "sealed_sender-343e991e9513997f.wasm",
-      "browser": "141.0.7390.37",
-      "seconds": 0.839,
-      "summary": "test result: ok. 11 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.64s",
+      "browser": "firefox 156.0 on linux",
+      "seconds": 1.188,
+      "summary": "test result: ok. 11 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.87s",
       "tests": [
         {
           "name": "test_server_cert",
@@ -150,15 +148,14 @@
           "name": "parse_empty_multi_recipient_sealed_sender",
           "status": "ok"
         }
-      ],
-      "output": "Loading Wasm module...\n\nrunning 11 tests\ntest test_server_cert ... ok\ntest test_sender_key_in_sealed_sender ... ok\ntest test_sender_cert ... ok\ntest test_sealed_sender_multi_recipient_redundant_empty_devices ... ok\ntest test_sealed_sender_multi_recipient_encrypt_with_bad_registration_id ... ok\ntest test_sealed_sender_multi_recipient_encrypt_with_archived_session ... ok\ntest test_sealed_sender_multi_recipient ... ok\ntest test_sealed_sender ... ok\ntest test_revoked_server_cert ... ok\ntest test_decryption_error_in_sealed_sender ... ok\ntest parse_empty_multi_recipient_sealed_sender ... ok\n\ntest result: ok. 11 passed; 0 failed; 0 ignored; 0 filtered out; finished in 0.64s\n\n"
+      ]
     },
     {
       "binary": "session",
       "wasm": "session-16bcdebf8f38949c.wasm",
-      "browser": "141.0.7390.37",
-      "seconds": 6.556,
-      "summary": "test result: ok. 29 passed; 0 failed; 0 ignored; 0 filtered out; finished in 6.37s",
+      "browser": "firefox 156.0 on linux",
+      "seconds": 6.669,
+      "summary": "test result: ok. 29 passed; 0 failed; 0 ignored; 0 filtered out; finished in 6.33s",
       "tests": [
         {
           "name": "x3dh_prekey_rejected_as_invalid_message_specifically",
@@ -276,8 +273,7 @@
           "name": "test_chain_jump_over_limit",
           "status": "ok"
         }
-      ],
-      "output": "Loading Wasm module...\n\nrunning 29 tests\ntest x3dh_prekey_rejected_as_invalid_message_specifically ... ok\ntest x3dh_established_session_is_or_is_not_usable ... ok\ntest test_zero_is_a_valid_prekey_id ... ok\ntest test_unacknowledged_sessions_eventually_expire ... ok\ntest test_simultaneous_initiate_with_lossage ... ok\ntest test_simultaneous_initiate_repeated_messages ... ok\ntest test_simultaneous_initiate_lost_message_repeated_messages ... ok\ntest test_simultaneous_initiate_lost_message ... ok\ntest test_signedprekey_not_saved ... ok\ntest test_repeat_bundle_message ... ok\ntest test_pqr_state_and_message_contents_nonempty ... ok\ntest test_optional_one_time_prekey ... ok\ntest test_message_key_limits ... ok\ntest test_longer_sessions ... ok\ntest test_duplicate_message_error_returned ... ok\ntest test_basic_simultaneous_initiate ... ok\ntest test_basic_session ... ok\ntest test_basic_prekey ... ok\ntest test_bad_signed_pre_key_signature ... ok\ntest test_bad_message_bundle ... ok\ntest proptest_session_resets ... ok\ntest prekey_message_to_archived_session ... ok\ntest prekey_message_sent_from_different_user_is_rejected ... ok\ntest prekey_message_rejects_wrong_local_recipient_address ... ok\ntest prekey_message_must_not_have_changed_identity_key ... ok\ntest prekey_message_failed_decryption_does_not_update_stores_even_when_previously_archived ... ok\ntest prekey_message_failed_decryption_does_not_update_stores ... ok\ntest test_chain_jump_over_limit_with_self ... ok\ntest test_chain_jump_over_limit ... ok\n\ntest result: ok. 29 passed; 0 failed; 0 ignored; 0 filtered out; finished in 6.37s\n\n"
+      ]
     }
   ]
 }

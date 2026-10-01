@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-10-01T15:00:03.917Z",
+  "ci_run": "https://github.com/jaredwray/signal-web/actions/runs/36880051338",
+  "origin": "http://localhost:8181",
+  "request_interception": "none (pages are only observed)",
+  "tools": {
+    "node": "v22.23.2",
+    "playwright": "1.56.1",
+    "os": "darwin 24.6.0",
+    "runner_image": "macos15 20260907.0337.1"
+  },
+  "wasm_bytes": 1338819,
+  "browser": "Safari 26.6.1 on macOS",
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6.1 Safari/605.1.15",
+  "restart": "NOT a browser restart: fresh page load within one automation session (driver limitation)",
+  "phase_setup": {
+    "passed": 7,
+    "failed": 0,
+    "checks": [
+      {
+        "name": "tablock.this_tab_acquires_lock",
+        "detail": "Web Locks lock held by this page",
+        "ok": true
+      },
+      {
+        "name": "tablock.second_context_refused",
+        "detail": "a second same-origin context (iframe) was told the lock is held elsewhere",
+        "ok": true
+      },
+      {
+        "name": "vault.create_once_under_race",
+        "detail": "two concurrent create() calls: one vault (PBKDF2-SHA256 600k -> non-extractable AES-256-GCM key), one refused with EXISTS",
+        "ok": true
+      },
+      {
+        "name": "conversation.messages_before_restart",
+        "detail": "10 messages decrypted correctly",
+        "ok": true
+      },
+      {
+        "name": "vault.atomic_commit_and_read_back",
+        "detail": "20771-byte libsignal state snapshot committed with its expectation record in one transaction",
+        "ok": true
+      },
+      {
+        "name": "vault.stored_bytes_are_ciphertext",
+        "detail": "IndexedDB holds only iv+ciphertext per record and {v, kdf params+salt, key check}; no key",
+        "ok": true
+      },
+      {
+        "name": "vault.reject_wrong_passphrase",
+        "detail": "rejected with WRONG_PASSPHRASE",
+        "ok": true
+      }
+    ],
+    "expected_session_digest": "45d6066e5676a876",
+    "storage_persist_granted": false,
+    "phase": "setup",
+    "ms": 685,
+    "kind": "local-storage-test"
+  },
+  "phase_resume_after_restart": {
+    "phase": "resume",
+    "passed": 9,
+    "kind": "local-storage-test",
+    "failed": 0,
+    "checks": [
+      {
+        "name": "vault.present_after_restart",
+        "detail": "IndexedDB state survived the browser restart",
+        "ok": true
+      },
+      {
+        "name": "vault.reject_wrong_passphrase_after_restart",
+        "detail": "rejected with WRONG_PASSPHRASE",
+        "ok": true
+      },
+      {
+        "name": "vault.unlock_after_restart",
+        "detail": "unlocked with the passphrase; key re-derived, never stored",
+        "ok": true
+      },
+      {
+        "name": "conversation.restored_state_matches_commit",
+        "detail": "restored session digest 45d6066e5676a876",
+        "ok": true
+      },
+      {
+        "name": "conversation.resume_messaging_after_restart",
+        "detail": "10 messages decrypted correctly",
+        "ok": true
+      },
+      {
+        "name": "vault.commit_after_resume",
+        "detail": "advanced ratchet state committed and reloadable",
+        "ok": true
+      },
+      {
+        "name": "vault.reject_corrupted_record",
+        "detail": "rejected with CORRUPT_RECORD; nothing was loaded",
+        "ok": true
+      },
+      {
+        "name": "vault.reject_swapped_record",
+        "detail": "rejected with CORRUPT_RECORD (record id is bound as AES-GCM additional data)",
+        "ok": true
+      },
+      {
+        "name": "vault.deleted_storage_detected",
+        "detail": "after deletion the client reports NO_VAULT (it must be linked again)",
+        "ok": true
+      }
+    ],
+    "ms": 446
+  },
+  "console": []
+}

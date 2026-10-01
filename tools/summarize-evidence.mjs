@@ -84,7 +84,7 @@ for (const { f, d } of probes) {
   const nc = SIGNAL.filter((h) => find('fetch/no-cors', h)?.ok).length;
   const ws = [...new Set(res.filter((r) => r.kind === 'websocket' && new URL(r.url).host !== CONTROL).map(wsOutcome))].join(', ');
   const navErr = [...new Set(SIGNAL.map((h) => hosts[h]?.navigation).filter((n) => n && !n.ok)
-    .map((n) => n.error.replace(/ at https?:\/\/\S+/, '').replace(/^page\.goto: /, '')))];
+    .map((n) => n.error.replace(/ at https?:\/\/\S+/, '').replace(/^page\.goto: /, '').replace(/:\s*$/, '')))];
   const dt = [...new Set(SIGNAL.flatMap((h) => hosts[h]?.devtools_errors ?? []))].filter((e) => /CERT/.test(e))
     .map((e) => e.replace('Error in connection establishment: ', 'WebSocket: '));
   const rejected = SIGNAL.filter((h) => hosts[h]?.certificate_rejected_by_browser).length;
@@ -116,10 +116,17 @@ for (const { f, d } of probes) {
   out.push(row([LABEL[spec] ?? spec, wasm ? 'yes' : 'no', String(a.qr_shown ?? false), text.length > 140 ? `${text.slice(0, 140)}…` : text]));
 }
 
-// --- Versions of everything around the browsers.
-out.push('', '#### Versions table', '', row(['Evidence', 'Browser', 'Node', 'Playwright', 'Runner image', 'OS']), row(Array(6).fill('---')));
-for (const { f, d } of [...local, ...live].filter((x) => x.d.tools && !x.f.includes('cloud-container')).sort((a, b) => a.f.localeCompare(b.f))) {
+// --- Versions of everything around the browsers, grouped by environment.
+out.push('', '#### Versions table', '', row(['Runner image', 'OS', 'Node', 'Playwright', 'Browsers', 'Evidence files']), row(Array(6).fill('---')));
+const envs = new Map();
+for (const { f, d } of [...local, ...live].filter((x) => x.d.tools && !x.f.includes('cloud-container'))) {
   const t = d.tools;
-  out.push(row([f.replace(/\.json$/, ''), d.browser ?? '-', t.node, t.playwright, t.runner_image ?? '-', t.os]));
+  const k = [t.runner_image ?? 'not a GitHub runner', t.os, t.node, t.playwright].join('|');
+  const e = envs.get(k) ?? envs.set(k, { t, browsers: new Set(), files: 0 }).get(k);
+  e.browsers.add(specOf(f));
+  e.files += 1;
+}
+for (const { t, browsers, files } of envs.values()) {
+  out.push(row([t.runner_image ?? 'not a GitHub runner', t.os, t.node, t.playwright, [...browsers].sort((a, b) => order.indexOf(a) - order.indexOf(b)).map((x) => LABEL[x] ?? x).join('; '), String(files)]));
 }
 console.log(out.join('\n'));

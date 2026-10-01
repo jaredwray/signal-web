@@ -39,7 +39,10 @@ What to expect (from the clean-network CI runs in `evidence/ci/`):
 | `wss://chat.signal.org/v1/websocket/provisioning/` | `error → close(code=1006)`; Firefox reports **1015** (TLS handshake failure) | Chrome/Edge: `Error in connection establishment: net::ERR_CERT_AUTHORITY_INVALID` |
 
 You can also visit `https://chat.signal.org/` in each browser's address bar. You should get
-the browser's untrusted-certificate interstitial; again, do not proceed past it.
+the browser's untrusted-certificate interstitial (Chrome/Edge: `NET::ERR_CERT_AUTHORITY_INVALID`;
+Firefox: `SEC_ERROR_UNKNOWN_ISSUER`; Safari: "This Connection Is Not Private"); again, do not
+proceed past it. Firefox's console may also print "Cross-Origin Request Blocked" for these
+requests; that is a side effect of the failed connection, not a CORS result.
 
 If the control row also fails, your network intercepts or blocks TLS (a corporate proxy, for
 example). Then the run says nothing about Signal. `tools/run-probe.mjs` reports this as

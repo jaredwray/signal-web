@@ -1,0 +1,223 @@
+{
+  "generated_at": "2026-10-01T15:00:03.917Z",
+  "ci_run": "https://github.com/jaredwray/signal-web/actions/runs/36880051338",
+  "origin": "http://localhost:8181",
+  "request_interception": "none (pages are only observed)",
+  "tools": {
+    "node": "v22.23.2",
+    "playwright": "1.56.1",
+    "os": "darwin 24.6.0",
+    "runner_image": "macos15 20260907.0337.1"
+  },
+  "wasm_bytes": 1338819,
+  "browser": "Safari 26.6.1 on macOS",
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6.1 Safari/605.1.15",
+  "passed": 33,
+  "failed": 0,
+  "checks": [
+    {
+      "ms": 8,
+      "detail": "identity public key 33 bytes, signature 64 bytes",
+      "name": "keygen.identity_sign_verify",
+      "ok": true
+    },
+    {
+      "ms": 22,
+      "detail": "public key 1569 bytes, ciphertext 1569 bytes, shared secret 32 bytes",
+      "name": "keygen.kyber1024_encapsulate",
+      "ok": true
+    },
+    {
+      "ms": 3,
+      "detail": "signed prekey + one-time prekey + Kyber1024 prekey signed by the identity key",
+      "name": "pqxdh.publish_bundle_with_kyber",
+      "ok": true
+    },
+    {
+      "ms": 10,
+      "detail": "Alice built an outgoing session from Bob's bundle",
+      "name": "pqxdh.process_prekey_bundle",
+      "ok": true
+    },
+    {
+      "ms": 14,
+      "detail": "PreKeySignalMessage decrypted by Bob",
+      "name": "session.first_message_is_prekey_message",
+      "ok": true
+    },
+    {
+      "ms": 2,
+      "detail": "SignalMessage decrypted by Alice",
+      "name": "session.reply_is_signal_message",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "both sessions: version 4, EstablishedWithPqxdh + Spqr",
+      "name": "session.pqxdh_and_spqr_in_use",
+      "ok": true
+    },
+    {
+      "ms": 98,
+      "detail": "40 alternating messages; session record 4296 -> 5680 bytes",
+      "name": "session.evolution_40_messages",
+      "ok": true
+    },
+    {
+      "ms": 4,
+      "detail": "6 messages decrypted in order [3,0,5,1,4,2]",
+      "name": "session.out_of_order_delivery",
+      "ok": true
+    },
+    {
+      "ms": 9,
+      "detail": "rebuilt both stores from 12482 serialized bytes; 10 more messages OK",
+      "name": "persistence.serialize_and_restore_sessions",
+      "ok": true
+    },
+    {
+      "ms": 2,
+      "detail": "rejected at decrypt (decrypt: invalid Whisper message: decryption failed)",
+      "name": "reject.flipped_mac_bit",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "rejected at decrypt (decrypt: invalid Whisper message: decryption failed)",
+      "name": "reject.flipped_body_bit",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "rejected at parse (parse SignalMessage: protobuf encoding was invalid)",
+      "name": "reject.truncated",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "rejected at parse (parse SignalMessage: ciphertext version was too old <2>)",
+      "name": "reject.unknown_version",
+      "ok": true
+    },
+    {
+      "ms": 1,
+      "detail": "session state intact after rejected messages",
+      "name": "accept.original_after_rejections",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "replay rejected as DuplicatedMessage (message with old counter 1 / 0)",
+      "name": "reject.replayed_message",
+      "ok": true
+    },
+    {
+      "ms": 10,
+      "detail": "rejected at decrypt (decrypt: invalid PreKey message: decryption failed); untampered original then accepted",
+      "name": "reject.tampered_prekey_message",
+      "ok": true
+    },
+    {
+      "ms": 2,
+      "detail": "466 byte envelope; sender certificate verified",
+      "name": "sealed_sender.roundtrip",
+      "ok": true
+    },
+    {
+      "ms": 3,
+      "detail": "rejected as InvalidSealedSenderMessage (invalid sealed sender message: trust root validation failed); same envelope accepted with the correct root",
+      "name": "sealed_sender.reject_untrusted_root",
+      "ok": true
+    },
+    {
+      "ms": 3,
+      "detail": "rejected 1 ms after expiry as InvalidSealedSenderMessage (libsignal's message for any certificate validation failure: invalid sealed sender message: trust root validation failed); accepted 1 ms before expiry",
+      "name": "sealed_sender.reject_expired_certificate",
+      "ok": true
+    },
+    {
+      "ms": 2,
+      "detail": "rejected (invalid sealed sender message: failed to decrypt sealed sender v1 message contents); untampered envelope then accepted",
+      "name": "sealed_sender.reject_tampered_envelope",
+      "ok": true
+    },
+    {
+      "ms": 2,
+      "detail": "UntrustedIdentity raised for a changed identity key",
+      "name": "identity.reject_changed_identity_key",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "no QR code is produced before a ProvisioningAddress arrives",
+      "name": "provisioning.qr_withheld_until_server_address",
+      "ok": true
+    },
+    {
+      "ms": 13,
+      "detail": "URL format matches Signal-Desktop linkDeviceRoute; QR SVG 19120 bytes; ack id 7 status 200",
+      "name": "provisioning.address_frame_link_url_and_ack",
+      "ok": true
+    },
+    {
+      "ms": 1,
+      "detail": "envelope frame decrypted, acknowledged, secrets kept in WASM",
+      "name": "provisioning.roundtrip_envelope_frame",
+      "ok": true
+    },
+    {
+      "ms": 2,
+      "detail": "message-before-address, second address and second message are rejected",
+      "name": "provisioning.reject_out_of_order_frames",
+      "ok": true
+    },
+    {
+      "ms": 2,
+      "detail": "359-byte envelope from a separate Python implementation decrypted; all fields match",
+      "name": "provisioning.independent_python_vector",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "rejected (provision envelope MAC verification failed)",
+      "name": "provisioning.reject_flipped_mac",
+      "ok": true
+    },
+    {
+      "ms": 1.0000000000004547,
+      "detail": "rejected (provision envelope MAC verification failed)",
+      "name": "provisioning.reject_flipped_ciphertext",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "rejected (unsupported provisioning body version 2)",
+      "name": "provisioning.reject_unknown_version",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "rejected (malformed provision envelope: body too short)",
+      "name": "provisioning.reject_truncated_body",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "rejected (provision envelope MAC verification failed)",
+      "name": "provisioning.reject_substituted_sender_key",
+      "ok": true
+    },
+    {
+      "ms": 0,
+      "detail": "rejected (provision envelope MAC verification failed)",
+      "name": "provisioning.reject_wrong_recipient",
+      "ok": true
+    }
+  ],
+  "wasm_instantiate_ms": 163.99999999999955,
+  "libsignal_core_version": "0.103.1",
+  "label": "LOCAL cryptographic test with synthetic identities; not a live Signal test",
+  "kind": "local-crypto-selftest",
+  "aborted": null,
+  "console": []
+}

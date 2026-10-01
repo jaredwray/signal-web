@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-10-01T15:04:18.183Z",
-  "ci_run": null,
+  "generated_at": "2026-10-01T14:59:31.306Z",
+  "ci_run": "https://github.com/jaredwray/signal-web/actions/runs/36880051338",
   "origin": "http://localhost:8181",
   "request_interception": "none (pages are only observed)",
   "tools": {
-    "node": "v22.22.0",
+    "node": "v22.23.3",
     "playwright": "1.56.1",
-    "os": "linux 6.18.44-fc-v50",
-    "runner_image": null
+    "os": "linux 6.17.0-1022-azure",
+    "runner_image": "ubuntu24 20260927.320.1"
   },
-  "wasm_bytes": 1340954,
-  "browser": "141.0.7390.37",
-  "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.37 Safari/537.36",
+  "wasm_bytes": 1341802,
+  "browser": "142.0.1",
+  "user_agent": "Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0",
   "restart": "separate browser processes sharing one profile directory",
   "phase_setup": {
     "kind": "local-storage-test",
@@ -54,10 +54,10 @@
         "detail": "rejected with WRONG_PASSPHRASE"
       }
     ],
-    "storage_persist_granted": false,
-    "expected_session_digest": "1c820e0cac2cf798",
+    "storage_persist_granted": "no answer within 3 s (permission prompt?)",
+    "expected_session_digest": "90e80c32b71c07d1",
     "phase": "setup",
-    "ms": 437
+    "ms": 3461
   },
   "phase_resume_after_restart": {
     "kind": "local-storage-test",
@@ -82,7 +82,7 @@
       {
         "name": "conversation.restored_state_matches_commit",
         "ok": true,
-        "detail": "restored session digest 1c820e0cac2cf798"
+        "detail": "restored session digest 90e80c32b71c07d1"
       },
       {
         "name": "conversation.resume_messaging_after_restart",
@@ -111,7 +111,7 @@
       }
     ],
     "phase": "resume",
-    "ms": 284
+    "ms": 831
   },
   "console": []
 }

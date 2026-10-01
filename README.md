@@ -4,11 +4,15 @@ A feasibility spike that asks one question with evidence: **can a statically hos
 run a Signal client entirely in a normal browser (Rust → WebAssembly), link to an existing
 account by QR code, and talk directly to Signal's servers, with no backend of ours?**
 
-**Outcome: `BLOCKED_UNDER_CURRENT_CONSTRAINTS`.** Signal's current cryptography runs correctly
-in browser WebAssembly, in every browser tested. But every Signal service host presents a TLS
-certificate from Signal's own private root CA. No browser root program includes that CA, and
-web pages cannot add trust anchors. As a result, no current browser can open the connections
-that linking, messaging, or attachments need. Evidence, scope, and alternatives are in
+**Outcome: `BLOCKED_UNDER_CURRENT_CONSTRAINTS`** (for a page connecting directly to Signal's
+primary service hostnames). Signal's current cryptography runs correctly in browser
+WebAssembly, in every browser tested. But every Signal service host presents a TLS certificate
+from Signal's own private root CA. No browser root program includes that CA, and web pages
+cannot add trust anchors. As a result, no tested browser could open the connections that
+linking, messaging, or attachments need; each one reported the certificate problem itself.
+A second blocker follows from source and spec: after linking, nearly every account operation
+needs a chat connection authenticated on its WebSocket upgrade, which a page cannot set up.
+Evidence, scope (including what was not evaluated), and alternatives are in
 [VALIDATION_REPORT.md](VALIDATION_REPORT.md).
 
 > Unofficial experiment, not affiliated with or endorsed by Signal. It is not a messenger.
