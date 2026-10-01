@@ -18,7 +18,12 @@ import { fileURLToPath } from 'node:url';
 import { browserArgs, openBrowser, specSlug } from './browsers.mjs';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
-const outDir = join(repo, 'evidence', 'local');
+// CI points EVIDENCE_OUT at a fresh per-job directory so only this run's
+// results are printed, never evidence files committed earlier.
+const ciRun = process.env.GITHUB_RUN_ID
+  ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+  : null;
+const outDir = process.env.EVIDENCE_OUT ?? join(repo, 'evidence', 'local');
 mkdirSync(outDir, { recursive: true });
 
 function buildTests() {
@@ -90,6 +95,7 @@ async function main() {
       libsignal_rev: 'e8cc2dddd578859b4a029c9c94670b24ce2b616a',
       transforms: 'scripts/wasmify_upstream_tests.py (#[test] attribute + SystemTime::now() shim only)',
       generated_at: new Date().toISOString(),
+      ci_run: ciRun,
       browser_spec: spec,
       browser: results[0]?.browser,
       request_interception: 'none',

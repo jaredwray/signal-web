@@ -34,7 +34,12 @@ if (process.env.SIGNAL_WEB_LIVE !== '1') {
   process.exit(2);
 }
 
-const outDir = join(repo, 'evidence', 'live');
+// CI points EVIDENCE_OUT at a fresh per-job directory so only this run's
+// results are printed, never evidence files committed earlier.
+const ciRun = process.env.GITHUB_RUN_ID
+  ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+  : null;
+const outDir = process.env.EVIDENCE_OUT ?? join(repo, 'evidence', 'live');
 // Top-level navigation targets: the browser's own TLS verdict per host.
 const NAV_HOSTS = [
   'chat.signal.org', 'grpc.chat.signal.org', 'storage.signal.org', 'cdn.signal.org',
@@ -200,6 +205,7 @@ async function probeOne(spec, origin, serverLog) {
     kind: 'live-browser-network-probe',
     label: 'LIVE network test from an ordinary browser origin; no Signal account or credentials used',
     generated_at: new Date().toISOString(),
+    ci_run: ciRun,
     browser_spec: spec,
     browser: browser.version,
     origin: `${origin} (static files only)`,

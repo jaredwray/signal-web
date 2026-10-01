@@ -17,7 +17,12 @@ import { fileURLToPath } from 'node:url';
 import { browserArgs, openBrowser, specSlug } from './browsers.mjs';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
-const outDir = join(repo, 'evidence', 'local');
+// CI points EVIDENCE_OUT at a fresh per-job directory so only this run's
+// results are printed, never evidence files committed earlier.
+const ciRun = process.env.GITHUB_RUN_ID
+  ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+  : null;
+const outDir = process.env.EVIDENCE_OUT ?? join(repo, 'evidence', 'local');
 
 export async function startServer(port, logFile) {
   if (logFile) rmSync(logFile, { force: true });
@@ -82,11 +87,14 @@ async function selftest(spec, origin, meta) {
   const evidence = { ...meta, browser: r.version, user_agent: r.userAgent, ...r.result, console: r.console };
   writeFileSync(join(outDir, `crypto-selftest-${specSlug(spec)}.json`), JSON.stringify(evidence, null, 2) + '\n');
   print(`[${spec}] crypto self-test`, r.result);
-  return r.result.failed + (r.result.crashed ? 1 : 0);
+  // An abort outside a named check can leave failed == 0; it is still a failure.
+  return r.result.failed + (r.result.crashed ? 1 : 0) + (r.result.aborted ? 1 : 0);
 }
 
 async function storage(spec, origin, meta) {
-  if (!existsSync(join(repo, 'web/storage-test.html'))) return 0;
+  if (!existsSync(join(repo, 'web/storage-test.html'))) {
+    throw new Error('web/storage-test.html is missing: the persistence test cannot be skipped');
+  }
   // Two separate browser processes sharing one profile directory: phase 1
   // writes encrypted state, the browser is shut down completely, and phase 2
   // starts a fresh browser that must unlock and resume from disk.
@@ -130,6 +138,11 @@ async function storage(spec, origin, meta) {
 }
 
 async function main() {
+  const wasm = join(repo, 'web/pkg/signal_web_core_bg.wasm');
+  if (!existsSync(wasm)) {
+    console.error('web/pkg/ is missing: build it first with `npm run build:wasm` (see README).');
+    process.exit(2);
+  }
   mkdirSync(outDir, { recursive: true });
   const specs = browserArgs(process.argv, ['pw:chromium']);
   const port = Number(process.env.STATIC_PORT ?? 8181);
@@ -138,6 +151,7 @@ async function main() {
   const origin = `http://localhost:${port}`;
   const meta = {
     generated_at: new Date().toISOString(),
+    ci_run: ciRun,
     origin,
     request_interception: 'none (pages are only observed)',
     wasm_bytes: readFileSync(join(repo, 'web/pkg/signal_web_core_bg.wasm')).length,
