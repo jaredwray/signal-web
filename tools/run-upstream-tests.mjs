@@ -52,10 +52,11 @@ async function runOne(spec, test, port) {
     const started = Date.now();
     const page = await browser.open(`http://127.0.0.1:${port}/`);
     await page.waitFor(
-      "/test result: (ok|FAILED)/.test(document.getElementById('output')?.textContent ?? '')",
+      () => /test result: (ok|FAILED)/.test(document.getElementById('output')?.textContent ?? ''),
+      undefined,
       30 * 60_000,
     );
-    const output = await page.evaluate("document.getElementById('output').textContent");
+    const output = await page.evaluate(() => document.getElementById('output').textContent);
     const tests = [...output.matchAll(/^test (\S+) \.\.\. (ok|FAIL|FAILED|ignored)/gm)]
       .map(([, name, status]) => ({ name, status }));
     const summary = output.match(/test result: .*/)?.[0] ?? 'missing summary';

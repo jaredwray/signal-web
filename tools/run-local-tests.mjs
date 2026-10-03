@@ -56,9 +56,9 @@ async function runOnce(spec, url, globalName, opts = {}) {
   const browser = await openBrowser(spec, opts);
   try {
     const page = await browser.open(url);
-    await page.waitFor(`window.${globalName} !== undefined`, 300_000);
-    const result = await page.evaluate(`window.${globalName}`);
-    const userAgent = await page.evaluate('navigator.userAgent');
+    await page.waitFor((name) => window[name] !== undefined, globalName, 300_000);
+    const result = await page.evaluate((name) => window[name], globalName);
+    const userAgent = await page.evaluate(() => navigator.userAgent);
     return { result, console: page.console, version: browser.version, userAgent };
   } finally {
     await browser.close();
@@ -76,9 +76,9 @@ async function runSameSession(spec, urls) {
       // runs in a fresh document.
       await browser.open('about:blank');
       const page = await browser.open(url);
-      await page.waitFor('window.__storagetest !== undefined', 300_000);
-      results.push({ result: await page.evaluate('window.__storagetest'), console: page.console });
-      userAgent = await page.evaluate('navigator.userAgent');
+      await page.waitFor(() => window.__storagetest !== undefined, undefined, 300_000);
+      results.push({ result: await page.evaluate(() => window.__storagetest), console: page.console });
+      userAgent = await page.evaluate(() => navigator.userAgent);
     }
     return { ...results[0], version: browser.version, userAgent, second: results[1] };
   } finally {

@@ -63,16 +63,16 @@ async function openPlaywright(spec, s, { userDataDir, launchArgs, proxy }) {
       page.on('console', (m) => consoleLines.push({ type: m.type(), text: m.text() }));
       page.on('pageerror', (e) => consoleLines.push({ type: 'pageerror', text: e.message }));
       await page.goto(url);
-      // Playwright eval()s *string* expressions inside the page, which the
-      // app's CSP (no 'unsafe-eval') rightly blocks; passing a function goes
-      // through DevTools instead and is unaffected by page CSP.
-      const fn = (expr) => new Function(`return (${expr});`);
+      // evaluate(fn, arg) / waitFor(fn, arg, ms): `fn` is a real function run
+      // in the page with `arg` as its argument. Playwright ships the function
+      // through DevTools, so it is unaffected by the page's CSP (no
+      // 'unsafe-eval') and no code is built from strings here.
       return {
         page,
         console: consoleLines,
-        evaluate: (expr) => page.evaluate(fn(expr)),
-        waitFor: (expr, timeoutMs) =>
-          page.waitForFunction(fn(expr), null, { timeout: timeoutMs, polling: 250 }),
+        evaluate: (fn, arg) => page.evaluate(fn, arg),
+        waitFor: (fn, arg, timeoutMs) =>
+          page.waitForFunction(fn, arg, { timeout: timeoutMs, polling: 250 }),
         close: () => page.close(),
       };
     },
@@ -135,9 +135,13 @@ async function openWebDriver(spec, s, { userDataDir }) {
   // the client give up first; a shorter driver timeout always answers first.
   await wd(s.url, 'POST', `/session/${id}/timeouts`, { pageLoad: 60_000 }).catch(() => {});
   const caps = session.capabilities ?? {};
-  const exec = (expr) => wd(s.url, 'POST', `/session/${id}/execute/sync`, {
-    script: `return (${expr});`,
-    args: [],
+  // Run a function in the page: the driver (W3C execute/sync) serializes the
+  // function source and runs it inside the browser, with `arg` as its single
+  // argument. `fn.toString()` is plain serialization — no code is evaluated in
+  // this process.
+  const exec = (fn, arg) => wd(s.url, 'POST', `/session/${id}/execute/sync`, {
+    script: `return (${fn.toString()}).apply(null, arguments);`,
+    args: arg === undefined ? [] : [arg],
   });
   return {
     spec,
@@ -150,12 +154,12 @@ async function openWebDriver(spec, s, { userDataDir }) {
       await wd(s.url, 'POST', `/session/${id}/url`, { url });
       return {
         console: [],
-        evaluate: exec,
-        async waitFor(expr, timeoutMs) {
+        evaluate: (fn, arg) => exec(fn, arg),
+        async waitFor(fn, arg, timeoutMs) {
           const deadline = Date.now() + timeoutMs;
           for (;;) {
-            if (await exec(expr)) return;
-            if (Date.now() > deadline) throw new Error(`timeout waiting for ${expr}`);
+            if (await exec(fn, arg)) return;
+            if (Date.now() > deadline) throw new Error(`timeout waiting for ${fn}`);
             await new Promise((r) => setTimeout(r, 500));
           }
         },

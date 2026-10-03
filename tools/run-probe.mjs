@@ -81,21 +81,21 @@ async function probeOne(spec, origin, serverLog) {
       report.console = consoleLines.filter((l) => /signal\.org/.test(l.text));
     } else {
       const page = await browser.open(`${origin}/probe.html?auto`);
-      await page.waitFor('window.__probe !== undefined', 300_000);
-      report = await page.evaluate('window.__probe');
+      await page.waitFor(() => window.__probe !== undefined, undefined, 300_000);
+      report = await page.evaluate(() => window.__probe);
       report.console = page.console.filter((l) => /signal\.org/.test(l.text));
     }
     // The real app's linking attempt, as a user would start it. Failures here
     // are recorded (with the page's own status text) rather than aborting.
     const app = await browser.open(`${origin}/index.html`);
-    const text = (sel) => app.evaluate(`document.querySelector('${sel}')?.textContent ?? null`).catch(() => null);
+    const text = (sel) => app.evaluate((s) => document.querySelector(s)?.textContent ?? null, sel).catch(() => null);
     try {
-      await app.waitFor("document.querySelector('#link') && !document.querySelector('#link').disabled", 60_000);
-      await app.evaluate("document.querySelector('#link').click()");
-      await app.waitFor("/Could not|Scan|approved|closed/.test(document.querySelector('#link-status').textContent)", 60_000);
+      await app.waitFor(() => { const el = document.querySelector('#link'); return !!el && !el.disabled; }, undefined, 60_000);
+      await app.evaluate(() => document.querySelector('#link').click());
+      await app.waitFor(() => /Could not|Scan|approved|closed/.test(document.querySelector('#link-status')?.textContent ?? ''), undefined, 60_000);
       appLink = {
         status_text: await text('#link-status'),
-        qr_shown: await app.evaluate("!document.querySelector('#qr').hidden"),
+        qr_shown: await app.evaluate(() => !document.querySelector('#qr').hidden),
       };
     } catch (err) {
       appLink = {
