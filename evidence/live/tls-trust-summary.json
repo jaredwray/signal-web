@@ -1,0 +1,329 @@
+{
+  "kind": "tls-trust-evidence",
+  "label": "LIVE non-browser diagnostic (openssl + public CT/CCADB data); not browser evidence",
+  "generated_at": "2026-10-01T13:41:59.761701+00:00",
+  "signal_root_sha256": "DDB0F92BB95C8D6FD202EA6E8CC5CCD182B544F8CD696F47D580659DDC9DF65A",
+  "hosts": {
+    "chat.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Apr  1 19:10:32 2026 GMT",
+            "not_after": "May  3 00:59:17 2027 GMT",
+            "sha256": "8A1DB9F1A954271606E199D6480DDC698C81CF61B1237083A893CFDDBB6589AC",
+            "san": "chat.signal.org"
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": false,
+        "verify_against_system_store": "20 (unable to get local issuer certificate)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "grpc.chat.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Dec 12 17:43:07 2025 GMT",
+            "not_after": "Jan 12 23:31:52 2027 GMT",
+            "sha256": "74F0A712D31CFD519F052D9BB36E5AB79D5EFA35938051DDCD2B8B16F3091775",
+            "san": "grpc.chat.signal.org"
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": false,
+        "verify_against_system_store": "20 (unable to get local issuer certificate)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "storage.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Apr 30 16:27:43 2026 GMT",
+            "not_after": "May 31 22:16:28 2027 GMT",
+            "sha256": "007A2E308F879B5881FAC96E98CA50EFA9164632982C49C60E9BFCA7F4F7C14E",
+            "san": "storage.signal.org"
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": false,
+        "verify_against_system_store": "20 (unable to get local issuer certificate)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "cdn.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Nov  7 19:35:11 2025 GMT",
+            "not_after": "Dec  9 01:23:56 2026 GMT",
+            "sha256": "2C0992034D069F73DAB9A6B3C13FFF601AE48C4D5C207FDF8ADD72243B432CA2",
+            "san": "cdn.signal.org"
+          },
+          {
+            "subject": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jan 26 00:45:51 2022 GMT",
+            "not_after": "Jan 24 00:45:50 2032 GMT",
+            "sha256": "DDB0F92BB95C8D6FD202EA6E8CC5CCD182B544F8CD696F47D580659DDC9DF65A",
+            "san": ""
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": true,
+        "verify_against_system_store": "19 (self-signed certificate in certificate chain)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "cdn2.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Oct  8 20:23:10 2025 GMT",
+            "not_after": "Nov  9 02:11:55 2026 GMT",
+            "sha256": "B4E3BF9F29A19565A85C0D01A41E44B599C2B71B74EB3950DDC22F14987435FC",
+            "san": "cdn2.signal.org"
+          },
+          {
+            "subject": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jan 26 00:45:51 2022 GMT",
+            "not_after": "Jan 24 00:45:50 2032 GMT",
+            "sha256": "DDB0F92BB95C8D6FD202EA6E8CC5CCD182B544F8CD696F47D580659DDC9DF65A",
+            "san": ""
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": true,
+        "verify_against_system_store": "19 (self-signed certificate in certificate chain)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "cdn3.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jul 17 13:47:32 2026 GMT",
+            "not_after": "Aug 17 19:36:17 2027 GMT",
+            "sha256": "B31749ADE88E7ABD324F8AADB8226A1F8EB0299B1896D1C84EDFF8D459E970AB",
+            "san": "cdn3.signal.org"
+          },
+          {
+            "subject": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jan 26 00:45:51 2022 GMT",
+            "not_after": "Jan 24 00:45:50 2032 GMT",
+            "sha256": "DDB0F92BB95C8D6FD202EA6E8CC5CCD182B544F8CD696F47D580659DDC9DF65A",
+            "san": ""
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": true,
+        "verify_against_system_store": "19 (self-signed certificate in certificate chain)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "cdsi.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "May 18 16:06:36 2026 GMT",
+            "not_after": "Jun 18 21:55:21 2027 GMT",
+            "sha256": "FB3FF727DCF4AEF06ADF3C140EF24B1DD98B188DAAF78580E60F9831C8D24295",
+            "san": "cdsi.signal.org"
+          },
+          {
+            "subject": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jan 26 00:45:51 2022 GMT",
+            "not_after": "Jan 24 00:45:50 2032 GMT",
+            "sha256": "DDB0F92BB95C8D6FD202EA6E8CC5CCD182B544F8CD696F47D580659DDC9DF65A",
+            "san": ""
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": true,
+        "verify_against_system_store": "19 (self-signed certificate in certificate chain)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "svr2.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jul 27 18:53:15 2026 GMT",
+            "not_after": "Aug 28 00:42:00 2027 GMT",
+            "sha256": "B46DEB8FFD46676ACE267020CFEAD718A03220AE37BF9DE782949D4BFEF6C5EC",
+            "san": "svr2.signal.org"
+          },
+          {
+            "subject": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jan 26 00:45:51 2022 GMT",
+            "not_after": "Jan 24 00:45:50 2032 GMT",
+            "sha256": "DDB0F92BB95C8D6FD202EA6E8CC5CCD182B544F8CD696F47D580659DDC9DF65A",
+            "san": ""
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": true,
+        "verify_against_system_store": "19 (self-signed certificate in certificate chain)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "svrb.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jul 23 22:52:47 2026 GMT",
+            "not_after": "Aug 24 04:41:32 2027 GMT",
+            "sha256": "E3B3A2984FA41DF725DEF2DBAB70AF1E3A797F0DE47FFED959127424442BC83A",
+            "san": "svrb.signal.org"
+          },
+          {
+            "subject": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+            "not_before": "Jan 26 00:45:51 2022 GMT",
+            "not_after": "Jan 24 00:45:50 2032 GMT",
+            "sha256": "DDB0F92BB95C8D6FD202EA6E8CC5CCD182B544F8CD696F47D580659DDC9DF65A",
+            "san": ""
+          }
+        ],
+        "leaf_issuer": "C = US, ST = California, L = Mountain View, O = \"Signal Messenger, LLC\", CN = Signal Messenger",
+        "signal_root_in_chain": true,
+        "verify_against_system_store": "19 (self-signed certificate in certificate chain)",
+        "verify_against_signal_root_only": "leaf: OK"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 0,
+        "sample": []
+      }
+    },
+    "updates.signal.org": {
+      "tls": {
+        "via_proxy": true,
+        "presented_chain": [
+          {
+            "subject": "CN = updates.signal.org",
+            "issuer": "C = US, O = Google Trust Services, CN = WE1",
+            "not_before": "Sep  4 05:42:09 2026 GMT",
+            "not_after": "Dec  3 06:41:50 2026 GMT",
+            "sha256": "1E84FE7DCDE76AFE44E8865A9D726FFF4792A873DE86689AD95FEDDEAD84C4AA",
+            "san": "updates.signal.org,*.updates.signal.org"
+          },
+          {
+            "subject": "C = US, O = Google Trust Services, CN = WE1",
+            "issuer": "C = US, O = Google Trust Services LLC, CN = GTS Root R4",
+            "not_before": "Dec 13 09:00:00 2023 GMT",
+            "not_after": "Feb 20 14:00:00 2029 GMT",
+            "sha256": "1DFC1605FBAD358D8BC844F76D15203FAC9CA5C1A79FD4857FFAF2864FBEBF96",
+            "san": ""
+          },
+          {
+            "subject": "C = US, O = Google Trust Services LLC, CN = GTS Root R4",
+            "issuer": "C = BE, O = GlobalSign nv-sa, OU = Root CA, CN = GlobalSign Root CA",
+            "not_before": "Nov 15 03:43:21 2023 GMT",
+            "not_after": "Jan 28 00:00:42 2028 GMT",
+            "sha256": "76B27B80A58027DC3CF1DA68DAC17010ED93997D0B603E2FADBE85012493B5A7",
+            "san": ""
+          }
+        ],
+        "leaf_issuer": "C = US, O = Google Trust Services, CN = WE1",
+        "signal_root_in_chain": false,
+        "verify_against_system_store": "0 (ok)",
+        "verify_against_signal_root_only": "error leaf: verification failed"
+      },
+      "certificate_transparency": {
+        "unexpired_logged_issuances": 11,
+        "sample": [
+          {
+            "not_before": "2026-06-30T00:00:00Z",
+            "not_after": "2027-01-13T23:59:59Z",
+            "issuer": "C=US, O=Amazon, CN=Amazon RSA 2048 M04"
+          },
+          {
+            "not_before": "2026-07-07T04:57:41Z",
+            "not_after": "2026-10-05T05:56:20Z",
+            "issuer": "C=US, O=Google Trust Services, CN=WR1"
+          },
+          {
+            "not_before": "2026-07-07T04:57:54Z",
+            "not_after": "2026-10-05T05:57:47Z",
+            "issuer": "C=US, O=Google Trust Services, CN=WE1"
+          }
+        ]
+      }
+    }
+  },
+  "ccadb": {
+    "source": "https://ccadb.my.salesforce-sites.com/ccadb/AllIncludedRootCertsCSV",
+    "included_roots_listed": 369,
+    "programs": [
+      "Apple",
+      "Google Chrome",
+      "Microsoft",
+      "Mozilla"
+    ],
+    "signal_root_matches": []
+  }
+}

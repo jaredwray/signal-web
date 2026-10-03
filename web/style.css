@@ -1,0 +1,13 @@
+:root { color-scheme: light dark; --pass: #1a7f37; --fail: #cf222e; --muted: #6e7781; }
+body { font: 15px/1.5 system-ui, sans-serif; margin: 0; padding: 16px; }
+main { max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 1.4rem; }
+.note { color: var(--muted); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { border-bottom: 1px solid #8884; padding: 4px 8px; text-align: left; vertical-align: top; }
+tr.pass td:nth-child(2) { color: var(--pass); font-weight: 600; }
+tr.fail td:nth-child(2) { color: var(--fail); font-weight: 600; }
+.status-ok { color: var(--pass); } .status-bad { color: var(--fail); }
+code, pre { font-size: 12px; }
+pre { white-space: pre-wrap; word-break: break-all; }
+button { font: inherit; padding: 6px 14px; }

@@ -141,3 +141,14 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# --- signal-web ---
+# Rust build output
+/target/
+# wasm-bindgen output (rebuild with `npm run build:wasm`; it links AGPL-3.0 libsignal)
+/web/pkg/
+# Generated from the pinned libsignal commit by scripts/prepare-upstream-tests.sh
+/crates/upstream-protocol-tests/tests/
+# Raw logs that may contain more than the sanitized evidence summaries
+*.jsonl
+netlog-*.json

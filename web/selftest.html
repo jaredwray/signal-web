@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>libsignal WASM self-test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>libsignal-protocol in WebAssembly: local self-test</h1>
+    <p class="note">LOCAL cryptographic test with synthetic identities. Nothing on this page
+      contacts Signal's servers or any official client.</p>
+    <p id="env"></p>
+    <p id="summary" role="status">Running…</p>
+    <table id="results">
+      <thead><tr><th>Check</th><th>Result</th><th>ms</th><th>Detail</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </main>
+  <script type="module" src="selftest.js"></script>
+</body>
+</html>

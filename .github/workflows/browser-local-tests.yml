@@ -1,0 +1,120 @@
+# LOCAL tests only: no Signal account and no contact with Signal's servers.
+# Builds the Rust/WASM crate and runs, in several real browsers:
+#   - the libsignal-protocol WASM self-test (web/selftest.html)
+#   - encrypted IndexedDB persistence across a browser restart (web/storage-test.html)
+#   - libsignal's own rust/protocol/tests compiled to WASM
+name: browser-local-tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+  CARGO_TERM_COLOR: never
+
+jobs:
+  linux:
+    name: Linux (Chromium, Chrome, Edge, Firefox, WebKit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out (plain git, no third-party action)
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "$HEAD_SHA"
+          git checkout -q FETCH_HEAD
+      - name: Fresh evidence directory (only this run's results get printed)
+        run: echo "EVIDENCE_OUT=$RUNNER_TEMP/evidence" >> "$GITHUB_ENV"
+      - name: Install build tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q protobuf-compiler
+          cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - name: Build WASM
+        run: bash scripts/build-wasm.sh
+      - name: Probe verdict logic (offline)
+        run: node tools/test-probe-verdict.mjs
+      - name: Install npm dependencies and Playwright engines
+        run: |
+          npm ci
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0 npx playwright install --with-deps chromium firefox webkit
+      - name: Start geckodriver (installed Firefox)
+        run: |
+          "$GECKOWEBDRIVER/geckodriver" --port 4444 > /tmp/geckodriver.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4444/status > /dev/null && break; sleep 1; done
+      - name: Browser versions
+        run: |
+          google-chrome --version || true
+          microsoft-edge --version || true
+          firefox --version || true
+          "$GECKOWEBDRIVER/geckodriver" --version | head -1 || true
+      - name: WASM self-test and persistence tests
+        if: ${{ !cancelled() }}
+        run: >
+          node tools/run-local-tests.mjs
+          --browser pw:chromium --browser pw:firefox --browser pw:webkit
+          --browser pw-channel:chrome --browser pw-channel:msedge
+          --browser wd:firefox@http://127.0.0.1:4444
+      - name: Upstream libsignal protocol tests in browsers
+        if: ${{ !cancelled() }}
+        run: |
+          bash scripts/prepare-upstream-tests.sh
+          node tools/run-upstream-tests.mjs --include-ignored \
+            --browser pw:chromium --browser pw:firefox --browser pw:webkit \
+            --browser pw-channel:chrome --browser wd:firefox@http://127.0.0.1:4444
+      - name: Print evidence
+        if: ${{ !cancelled() }}
+        run: node tools/print-evidence.mjs "$EVIDENCE_OUT"
+
+  safari:
+    name: macOS (Safari via safaridriver)
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - name: Check out (plain git, no third-party action)
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "$HEAD_SHA"
+          git checkout -q FETCH_HEAD
+      - name: Fresh evidence directory (only this run's results get printed)
+        run: echo "EVIDENCE_OUT=$RUNNER_TEMP/evidence" >> "$GITHUB_ENV"
+      - name: Install build tools
+        run: |
+          brew install protobuf
+          cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - name: Build WASM
+        run: bash scripts/build-wasm.sh
+      - name: Install npm dependencies
+        run: npm ci
+      - name: Start safaridriver
+        run: |
+          sudo safaridriver --enable
+          safaridriver -p 4445 > /tmp/safaridriver.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4445/status > /dev/null && break; sleep 1; done
+          sw_vers
+          defaults read /Applications/Safari.app/Contents/Info.plist CFBundleShortVersionString
+      - name: WASM self-test and persistence tests
+        if: ${{ !cancelled() }}
+        run: node tools/run-local-tests.mjs --browser wd:safari@http://127.0.0.1:4445
+      - name: Upstream libsignal protocol tests in Safari
+        if: ${{ !cancelled() }}
+        run: |
+          bash scripts/prepare-upstream-tests.sh
+          node tools/run-upstream-tests.mjs --include-ignored --browser wd:safari@http://127.0.0.1:4445
+      - name: Print evidence
+        if: ${{ !cancelled() }}
+        run: node tools/print-evidence.mjs "$EVIDENCE_OUT"

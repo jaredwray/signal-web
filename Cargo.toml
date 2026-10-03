@@ -1,0 +1,36 @@
+[workspace]
+resolver = "3"
+members = ["crates/signal-web-core", "crates/upstream-protocol-tests"]
+exclude = ["third_party"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+publish = false
+
+[workspace.dependencies]
+# Pinned to the libsignal commit inspected for VALIDATION_REPORT.md (2026-10-01).
+libsignal-protocol = { git = "https://github.com/signalapp/libsignal", rev = "e8cc2dddd578859b4a029c9c94670b24ce2b616a" }
+libsignal-core = { git = "https://github.com/signalapp/libsignal", rev = "e8cc2dddd578859b4a029c9c94670b24ce2b616a" }
+signal-crypto = { git = "https://github.com/signalapp/libsignal", rev = "e8cc2dddd578859b4a029c9c94670b24ce2b616a" }
+
+[patch.crates-io]
+# Test-only: crates.io proptest-arbitrary-interop 0.1.0 with proptest's default
+# `fork` feature disabled so libsignal's proptest test can run in a browser.
+proptest-arbitrary-interop = { path = "third_party/proptest-arbitrary-interop" }
+
+[profile.release]
+# Matches libsignal's own release profile choice.
+overflow-checks = true
+opt-level = "s"
+lto = true
+codegen-units = 1
+
+[profile.release.package.curve25519-dalek]
+overflow-checks = false
+
+[profile.release.package.sha2]
+overflow-checks = false
+
+[profile.release.package.hmac]
+overflow-checks = false

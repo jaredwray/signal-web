@@ -1,0 +1,137 @@
+{
+  "kind": "server-behavior-diagnostic",
+  "label": "LIVE non-browser diagnostic (curl trusting only Signal's pinned root); not browser evidence",
+  "generated_at": "2026-10-01T14:02:29.313535+00:00",
+  "trust_anchor": "tools/data/signal-messenger-root-2022.pem (no verification disabled)",
+  "via_proxy": true,
+  "cases": {
+    "preflight PUT /v1/devices/link (registration)": {
+      "request": {
+        "method": "OPTIONS",
+        "url": "https://chat.signal.org/v1/devices/link",
+        "headers": {
+          "Origin": "http://localhost:8080",
+          "Access-Control-Request-Method": "PUT",
+          "Access-Control-Request-Headers": "authorization,content-type"
+        },
+        "websocket_upgrade": false
+      },
+      "status_line": "HTTP/1.1 200 OK",
+      "selected_response_headers": [
+        "x-signal-timestamp:1790863349617"
+      ],
+      "curl_exit": 0,
+      "curl_error": null
+    },
+    "GET /v1/certificate/delivery with Origin, no credentials": {
+      "request": {
+        "method": "GET",
+        "url": "https://chat.signal.org/v1/certificate/delivery",
+        "headers": {
+          "Origin": "http://localhost:8080"
+        },
+        "websocket_upgrade": false
+      },
+      "status_line": "HTTP/1.1 401 Unauthorized",
+      "selected_response_headers": [
+        "vary:Accept-Encoding",
+        "x-signal-timestamp:1790863349860"
+      ],
+      "curl_exit": 0,
+      "curl_error": null
+    },
+    "WebSocket upgrade /v1/websocket/provisioning/ with browser Origin": {
+      "request": {
+        "method": "GET",
+        "url": "https://chat.signal.org/v1/websocket/provisioning/",
+        "headers": {
+          "Origin": "http://localhost:8080"
+        },
+        "websocket_upgrade": true
+      },
+      "status_line": "HTTP/1.1 101 Switching Protocols",
+      "selected_response_headers": [
+        "connection:Upgrade",
+        "sec-websocket-accept:t7JOLThkg/f62atFXQMRyjpudtQ=",
+        "upgrade:websocket",
+        "vary:Accept-Encoding",
+        "x-signal-timestamp:1790863350124"
+      ],
+      "curl_exit": 28,
+      "curl_error": "curl: (28) Operation timed out after 8000 milliseconds with 96 bytes received"
+    },
+    "WebSocket upgrade /v1/websocket/ (chat) with Origin, no credentials": {
+      "request": {
+        "method": "GET",
+        "url": "https://chat.signal.org/v1/websocket/",
+        "headers": {
+          "Origin": "http://localhost:8080"
+        },
+        "websocket_upgrade": true
+      },
+      "status_line": "HTTP/1.1 101 Switching Protocols",
+      "selected_response_headers": [
+        "connection:Upgrade",
+        "sec-websocket-accept:uLtqboPsU7jJfUVgaVwK6Ejx580=",
+        "upgrade:websocket",
+        "vary:Accept-Encoding",
+        "x-signal-timestamp:1790863358242"
+      ],
+      "curl_exit": 28,
+      "curl_error": "curl: (28) Operation timed out after 8000 milliseconds with 0 bytes received"
+    },
+    "preflight POST cdn3 TUS upload": {
+      "request": {
+        "method": "OPTIONS",
+        "url": "https://cdn3.signal.org/attachments",
+        "headers": {
+          "Origin": "http://localhost:8080",
+          "Access-Control-Request-Method": "POST",
+          "Access-Control-Request-Headers": "authorization,tus-resumable,upload-length,upload-metadata"
+        },
+        "websocket_upgrade": false
+      },
+      "status_line": "HTTP/1.1 404 Not Found",
+      "selected_response_headers": [
+        "alt-svc:h3=\":443\"; ma=86400",
+        "connection:keep-alive"
+      ],
+      "curl_exit": 0,
+      "curl_error": null
+    },
+    "GET cdn2 attachment path with Origin": {
+      "request": {
+        "method": "GET",
+        "url": "https://cdn2.signal.org/attachments/probe-nonexistent",
+        "headers": {
+          "Origin": "http://localhost:8080"
+        },
+        "websocket_upgrade": false
+      },
+      "status_line": "HTTP/1.1 404 Not Found",
+      "selected_response_headers": [
+        "alt-svc:h3=\":443\"; ma=86400",
+        "connection:keep-alive"
+      ],
+      "curl_exit": 0,
+      "curl_error": null
+    },
+    "GET cdn3 attachment path with Origin": {
+      "request": {
+        "method": "GET",
+        "url": "https://cdn3.signal.org/attachments/probe-nonexistent",
+        "headers": {
+          "Origin": "http://localhost:8080"
+        },
+        "websocket_upgrade": false
+      },
+      "status_line": "HTTP/1.1 404 Not Found",
+      "selected_response_headers": [
+        "alt-svc:h3=\":443\"; ma=86400",
+        "connection:keep-alive"
+      ],
+      "curl_exit": 0,
+      "curl_error": null
+    }
+  }
+}

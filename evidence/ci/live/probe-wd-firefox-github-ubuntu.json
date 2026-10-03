@@ -1,0 +1,756 @@
+{
+  "kind": "live-browser-network-probe",
+  "label": "LIVE network test from an ordinary browser origin; no Signal account or credentials used",
+  "generated_at": "2026-10-01T15:01:27.922Z",
+  "ci_run": "https://github.com/jaredwray/signal-web/actions/runs/36880051146",
+  "browser_spec": "wd:firefox@http://127.0.0.1:4444",
+  "browser": "firefox 156.0 on linux",
+  "tools": {
+    "node": "v22.23.3",
+    "playwright": "1.56.1",
+    "os": "linux 6.17.0-1022-azure",
+    "runner_image": "ubuntu24 20260927.320.1"
+  },
+  "origin": "http://localhost:8182 (static files only)",
+  "request_interception": "none",
+  "network_path": "browser default",
+  "verdict": {
+    "hosts": {
+      "chat.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": "error -> close(code=1015, wasClean=false, reason=\"\")",
+        "navigation": {
+          "ok": false,
+          "reached": false,
+          "error": "insecure certificate: "
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": true,
+        "tls_handshake_failed_unspecified": true,
+        "navigation_failed": true
+      },
+      "grpc.chat.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": "error -> close(code=1015, wasClean=false, reason=\"\")",
+        "navigation": {
+          "ok": false,
+          "reached": false,
+          "error": "insecure certificate: "
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": true,
+        "tls_handshake_failed_unspecified": true,
+        "navigation_failed": true
+      },
+      "storage.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "reached": false,
+          "error": "insecure certificate: "
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": true,
+        "tls_handshake_failed_unspecified": false,
+        "navigation_failed": true
+      },
+      "cdn.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "reached": false,
+          "error": "insecure certificate: "
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": true,
+        "tls_handshake_failed_unspecified": false,
+        "navigation_failed": true
+      },
+      "cdn2.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "reached": false,
+          "error": "insecure certificate: "
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": true,
+        "tls_handshake_failed_unspecified": false,
+        "navigation_failed": true
+      },
+      "cdn3.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "reached": false,
+          "error": "insecure certificate: "
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": true,
+        "tls_handshake_failed_unspecified": false,
+        "navigation_failed": true
+      },
+      "cdsi.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "reached": false,
+          "error": "insecure certificate: "
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": true,
+        "tls_handshake_failed_unspecified": false,
+        "navigation_failed": true
+      },
+      "svr2.signal.org": {
+        "page_cors_fetch_readable": false,
+        "page_websocket": null,
+        "navigation": {
+          "ok": false,
+          "reached": false,
+          "error": "insecure certificate: "
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": true,
+        "tls_handshake_failed_unspecified": false,
+        "navigation_failed": true
+      },
+      "updates.signal.org": {
+        "page_cors_fetch_readable": true,
+        "page_websocket": "error -> close(code=1006, wasClean=false, reason=\"\")",
+        "navigation": {
+          "ok": true,
+          "reached": true,
+          "title": "404 Not Found",
+          "landed_url": "https://updates.signal.org/probe-nonexistent"
+        },
+        "netlog_leaf_issuer": null,
+        "devtools_errors": [],
+        "certificate_rejected_by_browser": false,
+        "tls_handshake_failed_unspecified": false,
+        "navigation_failed": false
+      }
+    },
+    "interception_check": "no NetLog in this browser; relies on the control host being accepted while Signal hosts were not",
+    "validity": "VALID",
+    "reason": "control reachable; browser named a certificate problem for 8/8 Signal service hosts; top-level navigation failed for 8/8; page-readable Signal responses: 0",
+    "signal_hosts_certificate_rejected": [
+      "chat.signal.org",
+      "grpc.chat.signal.org",
+      "storage.signal.org",
+      "cdn.signal.org",
+      "cdn2.signal.org",
+      "cdn3.signal.org",
+      "cdsi.signal.org",
+      "svr2.signal.org"
+    ],
+    "signal_hosts_tls_handshake_failed_unspecified": [
+      "chat.signal.org",
+      "grpc.chat.signal.org"
+    ],
+    "signal_hosts_navigation_failed": [
+      "chat.signal.org",
+      "grpc.chat.signal.org",
+      "storage.signal.org",
+      "cdn.signal.org",
+      "cdn2.signal.org",
+      "cdn3.signal.org",
+      "cdsi.signal.org",
+      "svr2.signal.org"
+    ],
+    "signal_hosts_page_readable": []
+  },
+  "navigation": {
+    "chat.signal.org": {
+      "ok": false,
+      "reached": false,
+      "error": "insecure certificate: "
+    },
+    "grpc.chat.signal.org": {
+      "ok": false,
+      "reached": false,
+      "error": "insecure certificate: "
+    },
+    "storage.signal.org": {
+      "ok": false,
+      "reached": false,
+      "error": "insecure certificate: "
+    },
+    "cdn.signal.org": {
+      "ok": false,
+      "reached": false,
+      "error": "insecure certificate: "
+    },
+    "cdn2.signal.org": {
+      "ok": false,
+      "reached": false,
+      "error": "insecure certificate: "
+    },
+    "cdn3.signal.org": {
+      "ok": false,
+      "reached": false,
+      "error": "insecure certificate: "
+    },
+    "cdsi.signal.org": {
+      "ok": false,
+      "reached": false,
+      "error": "insecure certificate: "
+    },
+    "svr2.signal.org": {
+      "ok": false,
+      "reached": false,
+      "error": "insecure certificate: "
+    },
+    "updates.signal.org": {
+      "ok": true,
+      "reached": true,
+      "title": "404 Not Found",
+      "landed_url": "https://updates.signal.org/probe-nonexistent"
+    }
+  },
+  "app_link_attempt": {
+    "status_text": "Could not establish the provisioning connection (WebSocket closed, code 1015, before any data arrived). Browsers do not reveal the reason to pages; the developer console shows the network error. In our tests the browser rejected the server certificate: chat.signal.org uses a certificate from Signal's private root CA, which browsers do not trust. See VALIDATION_REPORT.md.",
+    "qr_shown": false
+  },
+  "page_report": {
+    "at": "2026-10-01T15:01:23.185Z",
+    "kind": "browser-network-probe",
+    "origin": "http://localhost:8182",
+    "results": [
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/cors",
+        "label": "chat REST",
+        "ms": 142,
+        "ok": false,
+        "purpose": "core: sender certificate (auth required)",
+        "readable": false,
+        "url": "https://chat.signal.org/v1/certificate/delivery"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/no-cors",
+        "label": "chat REST",
+        "ms": 115,
+        "ok": false,
+        "purpose": "core: sender certificate (auth required) [reachability diagnostic only]",
+        "readable": false,
+        "url": "https://chat.signal.org/v1/certificate/delivery"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/cors",
+        "label": "chat (grpc host)",
+        "ms": 117,
+        "ok": false,
+        "purpose": "core: libsignal-net chat host",
+        "readable": false,
+        "url": "https://grpc.chat.signal.org/"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/no-cors",
+        "label": "chat (grpc host)",
+        "ms": 119,
+        "ok": false,
+        "purpose": "core: libsignal-net chat host [reachability diagnostic only]",
+        "readable": false,
+        "url": "https://grpc.chat.signal.org/"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/cors",
+        "label": "storage",
+        "ms": 37,
+        "ok": false,
+        "purpose": "storage service (auth required)",
+        "readable": false,
+        "url": "https://storage.signal.org/v1/storage/manifest"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/no-cors",
+        "label": "storage",
+        "ms": 32,
+        "ok": false,
+        "purpose": "storage service (auth required) [reachability diagnostic only]",
+        "readable": false,
+        "url": "https://storage.signal.org/v1/storage/manifest"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/cors",
+        "label": "cdn0",
+        "ms": 75,
+        "ok": false,
+        "purpose": "attachment download path",
+        "readable": false,
+        "url": "https://cdn.signal.org/attachments/probe-nonexistent"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/no-cors",
+        "label": "cdn0",
+        "ms": 23,
+        "ok": false,
+        "purpose": "attachment download path [reachability diagnostic only]",
+        "readable": false,
+        "url": "https://cdn.signal.org/attachments/probe-nonexistent"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/cors",
+        "label": "cdn2",
+        "ms": 273,
+        "ok": false,
+        "purpose": "attachment download path",
+        "readable": false,
+        "url": "https://cdn2.signal.org/attachments/probe-nonexistent"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/no-cors",
+        "label": "cdn2",
+        "ms": 190,
+        "ok": false,
+        "purpose": "attachment download path [reachability diagnostic only]",
+        "readable": false,
+        "url": "https://cdn2.signal.org/attachments/probe-nonexistent"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/cors",
+        "label": "cdn3",
+        "ms": 57,
+        "ok": false,
+        "purpose": "attachment download path",
+        "readable": false,
+        "url": "https://cdn3.signal.org/attachments/probe-nonexistent"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/no-cors",
+        "label": "cdn3",
+        "ms": 96,
+        "ok": false,
+        "purpose": "attachment download path [reachability diagnostic only]",
+        "readable": false,
+        "url": "https://cdn3.signal.org/attachments/probe-nonexistent"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/cors",
+        "label": "cdsi",
+        "ms": 102,
+        "ok": false,
+        "purpose": "contact discovery (enclave)",
+        "readable": false,
+        "url": "https://cdsi.signal.org/"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/no-cors",
+        "label": "cdsi",
+        "ms": 101,
+        "ok": false,
+        "purpose": "contact discovery (enclave) [reachability diagnostic only]",
+        "readable": false,
+        "url": "https://cdsi.signal.org/"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/cors",
+        "label": "svr2",
+        "ms": 50,
+        "ok": false,
+        "purpose": "secure value recovery (enclave)",
+        "readable": false,
+        "url": "https://svr2.signal.org/"
+      },
+      {
+        "error": "TypeError: NetworkError when attempting to fetch resource.",
+        "kind": "fetch/no-cors",
+        "label": "svr2",
+        "ms": 44,
+        "ok": false,
+        "purpose": "secure value recovery (enclave) [reachability diagnostic only]",
+        "readable": false,
+        "url": "https://svr2.signal.org/"
+      },
+      {
+        "body_bytes": 725,
+        "kind": "fetch/cors",
+        "label": "CONTROL updates",
+        "ms": 53,
+        "ok": true,
+        "purpose": "control: Signal host with a publicly trusted certificate",
+        "readable": true,
+        "readable_headers": [
+          "cache-control",
+          "content-length",
+          "content-type",
+          "expires",
+          "last-modified"
+        ],
+        "status": 200,
+        "type": "cors",
+        "url": "https://updates.signal.org/desktop/latest.yml"
+      },
+      {
+        "kind": "fetch/no-cors",
+        "label": "CONTROL updates",
+        "ms": 20,
+        "ok": true,
+        "purpose": "control: Signal host with a publicly trusted certificate [reachability diagnostic only]",
+        "readable": false,
+        "readable_headers": [],
+        "status": 0,
+        "type": "opaque",
+        "url": "https://updates.signal.org/desktop/latest.yml"
+      },
+      {
+        "events": [
+          "error",
+          "close(code=1015, wasClean=false, reason=\"\")"
+        ],
+        "kind": "websocket",
+        "label": "provisioning (chat)",
+        "ms": 183,
+        "purpose": "core: linking",
+        "url": "wss://chat.signal.org/v1/websocket/provisioning/"
+      },
+      {
+        "events": [
+          "error",
+          "close(code=1015, wasClean=false, reason=\"\")"
+        ],
+        "kind": "websocket",
+        "label": "provisioning (grpc host)",
+        "ms": 127,
+        "purpose": "core: linking via libsignal-net host",
+        "url": "wss://grpc.chat.signal.org/v1/websocket/provisioning/"
+      },
+      {
+        "events": [
+          "error",
+          "close(code=1006, wasClean=false, reason=\"\")"
+        ],
+        "kind": "websocket",
+        "label": "CONTROL updates",
+        "ms": 436,
+        "purpose": "control: publicly trusted certificate, not a WebSocket endpoint",
+        "url": "wss://updates.signal.org/v1/websocket/provisioning/"
+      }
+    ],
+    "secure_context": true,
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64; rv:156.0) Gecko/20100101 Firefox/156.0",
+    "console": []
+  },
+  "devtools_network": [],
+  "netlog": null,
+  "static_origin_requests": [
+    {
+      "method": "GET",
+      "path": "/probe.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/index.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/app.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/lib/tablock.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core_bg.wasm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/index.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/app.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/lib/tablock.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core_bg.wasm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/index.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/app.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/lib/tablock.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core_bg.wasm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/index.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/app.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/lib/tablock.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core_bg.wasm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/index.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/app.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/lib/tablock.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core_bg.wasm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/probe.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/index.html",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/style.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/app.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/lib/tablock.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pkg/signal_web_core_bg.wasm",
+      "status": 200
+    }
+  ]
+}
