@@ -115,7 +115,20 @@ async function openWebDriver(spec, s, { userDataDir }) {
       args: ['-headless', ...(userDataDir ? ['-profile', userDataDir] : [])],
     };
   }
-  const session = await wd(s.url, 'POST', '/session', { capabilities: { alwaysMatch } });
+  // safaridriver can time out launching Safari on the first session right after
+  // `safaridriver --enable` (a cold start: "session not created ... timed out
+  // ... launching a compatible local Safari"). Later sessions in the same run
+  // succeed, so retry session creation a few times before giving up.
+  let session;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      session = await wd(s.url, 'POST', '/session', { capabilities: { alwaysMatch } });
+      break;
+    } catch (err) {
+      if (attempt >= 5) throw err;
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+  }
   const id = session.sessionId;
   // The default page-load timeout (300 s) equals Node fetch's response-header
   // timeout, so a navigation that never commits (e.g. a download) could make
